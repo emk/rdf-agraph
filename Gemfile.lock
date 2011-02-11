@@ -1,0 +1,31 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    addressable (2.2.4)
+    agraph (0.1.4)
+      transport (>= 1.0.0)
+    diff-lcs (1.1.2)
+    json (1.4.6)
+    rdf (0.3.1)
+      addressable (>= 2.2)
+    rdf-spec (0.3.1)
+      rspec (>= 2.1)
+    rspec (2.5.0)
+      rspec-core (~> 2.5.0)
+      rspec-expectations (~> 2.5.0)
+      rspec-mocks (~> 2.5.0)
+    rspec-core (2.5.1)
+    rspec-expectations (2.5.0)
+      diff-lcs (~> 1.1.2)
+    rspec-mocks (2.5.0)
+    transport (1.0.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  agraph
+  json
+  rdf
+  rdf-spec
+  rspec
