@@ -10,6 +10,8 @@ module RDF
         @server = ::AllegroGraph::Server.new(server_options)
         @repo = ::AllegroGraph::Repository.new(@server, repository)
         @repo.create_if_missing!        
+        @blank_nodes_local_to_server = {}
+        @blank_nodes_server_to_local = {}
       end
 
       def each
@@ -35,10 +37,12 @@ module RDF
       end
 
       def delete_statement(statement)
-        @repo.statements.delete(:subject => serialize(statement.subject),
-                                :predicate => serialize(statement.predicate),
-                                :object => serialize(statement.object),
-                                :context => serialize(statement.context))
+        @repo.statements.delete(statement_to_dict(statement))
+      end
+
+      def has_statement?(statement)
+        found = @repo.statements.find(statement_to_dict(statement))
+        !found.empty?
       end
 
       def clear
@@ -47,12 +51,56 @@ module RDF
 
       protected
 
-      def serialize(value)
-        RDF::NTriples::Writer.serialize(value)
+      def statement_to_dict(statement)
+        {
+          :subject => serialize(statement.subject),
+          :predicate => serialize(statement.predicate),
+          :object => serialize(statement.object),
+          :context => serialize(statement.context)
+        }
       end
 
-      def unserialize(value)
-        RDF::NTriples::Reader.unserialize(value)
+      # Return true if this a blank RDF node.
+      def blank_node?(node)
+        !node.nil? && node.anonymous?
+      end
+
+      # Allocate an "official" AllegroGraph blank node, which should
+      # maintain its identity across requests.
+      def allocate_blank_node
+        response = @server.request_http(:post, "#{@repo.path}/blankNodes",
+                                        :parameters => { :amount => 1 },
+                                        :expected_status_code => 200)
+        response.chomp.gsub(/^_:/, '')
+      end
+
+      def map_to_server(node)
+        return node unless blank_node?(node)
+        unless @blank_nodes_local_to_server.has_key?(node.id)
+          new_id = allocate_blank_node
+          #puts "Mapping #{node.id} -> #{new_id}"
+          @blank_nodes_local_to_server[node.id] = new_id
+          @blank_nodes_server_to_local[new_id] = node.id
+        end
+        RDF::Node.new(@blank_nodes_local_to_server[node.id])
+      end
+
+      def map_from_server(node)
+        return node unless blank_node?(node)
+        if @blank_nodes_server_to_local.has_key?(node.id)
+          RDF::Node.new(@blank_nodes_server_to_local[node.id])
+        else
+          # TODO: Set up an identity mapping.
+          node
+        end
+      end
+
+      def serialize(node)
+        RDF::NTriples::Writer.serialize(map_to_server(node))
+      end
+
+      def unserialize(node)
+       map_from_server(RDF::NTriples::Reader.unserialize(node))
       end
     end
   end
