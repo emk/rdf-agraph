@@ -74,13 +74,17 @@ module RDF
         response.chomp.gsub(/^_:/, '')
       end
 
+      def map_blank_node(local_id, server_id)
+        #puts "Mapping #{local_id} -> #{server_id}"
+        @blank_nodes_local_to_server[local_id] = server_id
+        @blank_nodes_server_to_local[server_id] = local_id
+      end
+
       def map_to_server(node)
         return node unless blank_node?(node)
         unless @blank_nodes_local_to_server.has_key?(node.id)
           new_id = allocate_blank_node
-          #puts "Mapping #{node.id} -> #{new_id}"
-          @blank_nodes_local_to_server[node.id] = new_id
-          @blank_nodes_server_to_local[new_id] = node.id
+          map_blank_node(node.id, new_id)
         end
         RDF::Node.new(@blank_nodes_local_to_server[node.id])
       end
@@ -90,7 +94,9 @@ module RDF
         if @blank_nodes_server_to_local.has_key?(node.id)
           RDF::Node.new(@blank_nodes_server_to_local[node.id])
         else
-          # TODO: Set up an identity mapping.
+          # We didn't generate this node ID, so we want to pass it back to
+          # the server unchanged.
+          map_blank_node(node.id, node.id)
           node
         end
       end
