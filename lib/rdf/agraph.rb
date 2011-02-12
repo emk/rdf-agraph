@@ -15,10 +15,12 @@ module RDF
       def each
         if block_given?
           @repo.statements.find.each do |statement|
-            # TODO: Why don't we get a context with these?
-            yield RDF::Statement.new(unserialize(statement[0]),
-                                     unserialize(statement[1]),
-                                     unserialize(statement[2]))
+            s,p,o,c = statement.map {|v| unserialize(v) }
+            if c.nil?
+              yield RDF::Statement.new(s,p,o)
+            else
+              yield RDF::Statement.new(s,p,o,c)
+            end
           end
         else
           ::Enumerable::Enumerator.new(self, :each)
