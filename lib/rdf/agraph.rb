@@ -68,6 +68,12 @@ module RDF
         # statements.  We can't leave this as, because it's subject to race
         # conditions.  We need to either use transactions, find appropriate
         # AllegroGraph documentation, or talk to the RDF.rb folks.
+        #
+        # A discussion of duplicate RDF statements:
+        # http://lists.w3.org/Archives/Public/www-rdf-interest/2004Oct/0091.html
+        #
+        # Note that specifying deleteDuplicates on repository creation doesn't
+        # seem to affect this.
         unless has_statement?(statement)
           @repo.statements.create(serialize(statement.subject),
                                   serialize(statement.predicate),
