@@ -63,7 +63,7 @@ module RDF
           :subject => serialize(statement.subject),
           :predicate => serialize(statement.predicate),
           :object => serialize(statement.object),
-          :context => serialize(statement.context)
+          :context => serialize(statement.context) || 'null'
         }
       end
 
