@@ -141,7 +141,7 @@ module RDF
       end
 
       # TODO: Override delete to implement fast wildcard deletion without
-      # having to first enumerate the matching records.
+      # having to first query for the matching records.
 
       # Clear all statements from the repository.
       def clear
