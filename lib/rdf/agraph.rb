@@ -14,6 +14,13 @@ module RDF
         @blank_nodes_server_to_local = {}
       end
 
+      def supports?(feature)
+        case feature.to_sym
+        when :context then true
+        else false
+        end
+      end
+
       def each
         if block_given?
           @repo.statements.find.each do |statement|
@@ -21,7 +28,7 @@ module RDF
             if c.nil?
               yield RDF::Statement.new(s,p,o)
             else
-              yield RDF::Statement.new(s,p,o,c)
+              yield RDF::Statement.new(s,p,o, :context => c)
             end
           end
         else
