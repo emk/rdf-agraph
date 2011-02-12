@@ -56,9 +56,9 @@ module RDF
       #--------------------------------------------------------------------
       # RDF::Countable methods
       #
-      # I'd love to override these methods for the sake of performance, but
-      # RDF.rb does not want duplicate statements to be counted twice, and
-      # AllegoGraph does count them.
+      # TODO: I'd love to override these methods for the sake of
+      # performance, but RDF.rb does not want duplicate statements to be
+      # counted twice, and AllegoGraph does count them.
 
       # Is this repository empty?
       #def empty?
