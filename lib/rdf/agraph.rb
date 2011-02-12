@@ -38,12 +38,16 @@ module RDF
       # methods.
       def each
         if block_given?
+          seen = {}
           @repo.statements.find.each do |statement|
-            s,p,o,c = statement.map {|v| unserialize(v) }
-            if c.nil?
-              yield RDF::Statement.new(s,p,o)
-            else
-              yield RDF::Statement.new(s,p,o, :context => c)
+            unless seen.has_key?(statement)
+              seen[statement] = true
+              s,p,o,c = statement.map {|v| unserialize(v) }
+              if c.nil?
+                yield RDF::Statement.new(s,p,o)
+              else
+                yield RDF::Statement.new(s,p,o, :context => c)
+              end
             end
           end
         else
@@ -60,18 +64,22 @@ module RDF
 
       #--------------------------------------------------------------------
       # RDF::Countable methods
+      #
+      # I'd love to override these methods for the sake of performance, but
+      # RDF.rb does not want duplicate statements to be counted twice, and
+      # AllegoGraph does count them.
 
       # Is this repository empty?
-      def empty?
-        count == 0
-      end
+      #def empty?
+      #  count == 0
+      #end
 
       # How many statements are in this repository?
-      def count
-        @server.request_http(:get, "#{@repo.path}/statements",
-                             :headers => { 'Accept' => 'text/integer' },
-                             :expected_status_code => 200).chomp.to_i
-      end
+      #def count
+      #  @server.request_http(:get, "#{@repo.path}/statements",
+      #                       :headers => { 'Accept' => 'text/integer' },
+      #                       :expected_status_code => 200).chomp.to_i
+      #end
 
 
       #--------------------------------------------------------------------
@@ -79,23 +87,29 @@ module RDF
 
       # Insert a single statement into the repository.
       def insert_statement(statement)
+        insert_statements([statement])
+      end
+
+      # Insert multiple statements at once.
+      def insert_statements(statements)
         # FIXME: RDF.rb expects duplicate statements to be ignored if
         # inserted into a mutable store, but AllegoGraph allows duplicate
-        # statements.  We can't leave this as, because it's subject to race
-        # conditions.  We need to either use transactions, find appropriate
-        # AllegroGraph documentation, or talk to the RDF.rb folks.
+        # statements.  We work around this in our other methods, but we
+        # need to either use transactions, find appropriate AllegroGraph
+        # documentation, or talk to the RDF.rb folks.
         #
         # A discussion of duplicate RDF statements:
         # http://lists.w3.org/Archives/Public/www-rdf-interest/2004Oct/0091.html
         #
         # Note that specifying deleteDuplicates on repository creation doesn't
         # seem to affect this.
-        unless has_statement?(statement)
-          @repo.statements.create(serialize(statement.subject),
-                                  serialize(statement.predicate),
-                                  serialize(statement.object),
-                                  serialize(statement.context))
+        json = statements.map do |s|
+          tuple = [s.subject, s.predicate, s.object]
+          tuple << s.context if s.context
+          tuple.map {|v| serialize(v) }
         end
+        @server.request_json(:post, "#{@repo.path}/statements", :body => json,
+                             :expected_status_code => 204)
       end
 
       # Delete a single statement from the repository.
