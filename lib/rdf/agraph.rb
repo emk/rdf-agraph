@@ -59,6 +59,22 @@ module RDF
 
 
       #--------------------------------------------------------------------
+      # RDF::Countable methods
+
+      # Is this repository empty?
+      def empty?
+        count == 0
+      end
+
+      # How many statements are in this repository?
+      def count
+        @server.request_http(:get, "#{@repo.path}/statements",
+                             :headers => { 'Accept' => 'text/integer' },
+                             :expected_status_code => 200).chomp.to_i
+      end
+
+
+      #--------------------------------------------------------------------
       # RDF::Mutable methods
 
       # Insert a single statement into the repository.
