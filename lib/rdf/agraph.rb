@@ -61,10 +61,17 @@ module RDF
 
       # Insert a single statement into the repository.
       def insert_statement(statement)
-        @repo.statements.create(serialize(statement.subject),
-                                serialize(statement.predicate),
-                                serialize(statement.object),
-                                serialize(statement.context))
+        # FIXME: RDF.rb expects duplicate statements to be ignored if
+        # inserted into a mutable store, but AllegoGraph allows duplicate
+        # statements.  We can't leave this as, because it's subject to race
+        # conditions.  We need to either use transactions, find appropriate
+        # AllegroGraph documentation, or talk to the RDF.rb folks.
+        unless has_statement?(statement)
+          @repo.statements.create(serialize(statement.subject),
+                                  serialize(statement.predicate),
+                                  serialize(statement.object),
+                                  serialize(statement.context))
+        end
       end
 
       # Delete a single statement from the repository.
