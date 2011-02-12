@@ -36,23 +36,8 @@ module RDF
       # Iterate over all statements in the repository.  This is used by
       # RDF::Enumerable as a fallback for handling any unimplemented
       # methods.
-      def each
-        if block_given?
-          seen = {}
-          @repo.statements.find.each do |statement|
-            unless seen.has_key?(statement)
-              seen[statement] = true
-              s,p,o,c = statement.map {|v| unserialize(v) }
-              if c.nil?
-                yield RDF::Statement.new(s,p,o)
-              else
-                yield RDF::Statement.new(s,p,o, :context => c)
-              end
-            end
-          end
-        else
-          ::Enumerable::Enumerator.new(self, :each)
-        end
+      def each(&block)
+        query_pattern(RDF::Query::Pattern.new, &block)
       end
 
       # Does the repository contain the specified statement?
@@ -80,6 +65,32 @@ module RDF
       #                       :headers => { 'Accept' => 'text/integer' },
       #                       :expected_status_code => 200).chomp.to_i
       #end
+
+
+      #--------------------------------------------------------------------
+      # RDF::Queryable methods
+
+      # Return all RDF statements matching a pattern.
+      def query_pattern(pattern)
+        if block_given?
+          seen = {}
+          dict = statement_to_dict(pattern)
+          dict.delete(:context) if dict[:context] == 'null'
+          @repo.statements.find(dict).each do |statement|
+            unless seen.has_key?(statement)
+              seen[statement] = true
+              s,p,o,c = statement.map {|v| unserialize(v) }
+              if c.nil?
+                yield RDF::Statement.new(s,p,o)
+              else
+                yield RDF::Statement.new(s,p,o, :context => c)
+              end
+            end
+          end
+        else
+          ::Enumerable::Enumerator.new(self, :query_pattern, pattern)
+        end        
+      end
 
 
       #--------------------------------------------------------------------
