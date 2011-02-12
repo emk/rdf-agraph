@@ -46,6 +46,12 @@ module RDF
         !found.empty?
       end
 
+      # TODO: There are lots of methods with names like 'predicates',
+      # 'each_predicate', etc., that we could usefully override if anybody
+      # needs to be able to list all the predicates in the repository
+      # without scanning every record.  But we'll wait until somebody needs
+      # those before overriding the default implementations.
+
 
       #--------------------------------------------------------------------
       # RDF::Countable methods
@@ -92,6 +98,9 @@ module RDF
         end        
       end
 
+      # TODO: Override first, first_subject, first_predicate, first_object,
+      # first_literal for performance.
+
 
       #--------------------------------------------------------------------
       # RDF::Mutable methods
@@ -131,7 +140,8 @@ module RDF
                              :body => json, :expected_status_code => 204)
       end
 
-      # TODO: Fast wildcard deletion without a query first.
+      # TODO: Override delete to implement fast wildcard deletion without
+      # having to first enumerate the matching records.
 
       # Clear all statements from the repository.
       def clear
