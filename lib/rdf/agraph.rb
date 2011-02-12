@@ -15,7 +15,9 @@ module RDF
         server_options.delete(:repository)
         @server = ::AllegroGraph::Server.new(server_options)
         @repo = ::AllegroGraph::Repository.new(@server, repository)
-        @repo.create_if_missing!        
+        @repo.create_if_missing!
+        @blank_nodes = []
+        @blank_nodes_to_generate = 8
         @blank_nodes_local_to_server = {}
         @blank_nodes_server_to_local = {}
       end
@@ -115,13 +117,22 @@ module RDF
         !node.nil? && node.anonymous?
       end
 
+      # Ask AllegroGraph to generate a series of blank node IDs.
+      def genetate_blank_nodes(amount)
+        response = @server.request_http(:post, "#{@repo.path}/blankNodes",
+                                        :parameters => { :amount => amount },
+                                        :expected_status_code => 200)
+        response.chomp.split("\n").map {|i| i.gsub(/^_:/, '') }
+      end
+
       # Allocate an "official" AllegroGraph blank node, which should
       # maintain its identity across requests.
       def allocate_blank_node
-        response = @server.request_http(:post, "#{@repo.path}/blankNodes",
-                                        :parameters => { :amount => 1 },
-                                        :expected_status_code => 200)
-        response.chomp.gsub(/^_:/, '')
+        if @blank_nodes.empty?
+          @blank_nodes = genetate_blank_nodes(@blank_nodes_to_generate).reverse
+          @blank_nodes_to_generate *= 2
+        end
+        @blank_nodes.pop
       end
 
       # Create a mapping between a local blank node ID and a server-side
