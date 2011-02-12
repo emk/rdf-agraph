@@ -103,19 +103,24 @@ module RDF
         #
         # Note that specifying deleteDuplicates on repository creation doesn't
         # seem to affect this.
-        json = statements.map do |s|
-          tuple = [s.subject, s.predicate, s.object]
-          tuple << s.context if s.context
-          tuple.map {|v| serialize(v) }
-        end
+        json = statements_to_json(statements)
         @server.request_json(:post, "#{@repo.path}/statements", :body => json,
                              :expected_status_code => 204)
       end
 
       # Delete a single statement from the repository.
       def delete_statement(statement)
-        @repo.statements.delete(statement_to_dict(statement))
+        delete_statements([statement])
       end
+
+      # Delete multiple statements from the repository.
+      def delete_statements(statements)
+        json = statements_to_json(statements)
+        @server.request_json(:post, "#{@repo.path}/statements/delete",
+                             :body => json, :expected_status_code => 204)
+      end
+
+      # TODO: Fast wildcard deletion without a query first.
 
       # Clear all statements from the repository.
       def clear
@@ -123,6 +128,15 @@ module RDF
       end
 
       protected
+
+      # Convert a list of statements to a JSON-compatible array.
+      def statements_to_json(statements)
+        statements.map do |s|
+          tuple = [s.subject, s.predicate, s.object]
+          tuple << s.context if s.context
+          tuple.map {|v| serialize(v) }
+        end        
+      end
 
       # Translate a RDF::Statement into a dictionary the we can pass
       # directly to the 'agraph' gem.
