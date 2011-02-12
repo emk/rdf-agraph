@@ -25,7 +25,7 @@ module RDF
       def supports?(feature)
         case feature.to_sym
         when :context then true
-        else false
+        else super
         end
       end
 
