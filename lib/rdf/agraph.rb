@@ -3,6 +3,13 @@
 module RDF
   module AllegroGraph
     # An AllegroGraph RDF repository.
+    #
+    # WARNING: The first time a blank node is serialized for transmission
+    # to the server, this class will ask the server to generate a list of
+    # blank node IDs.  These IDs will be cached locally.  Normally, this
+    # should work without any problems, but exercise caution when using the
+    # Unix 'fork' function (as called by Unicorn, Spork, or other
+    # high-performance Ruby libraries).
     class Repository < RDF::Repository
 
 
@@ -28,6 +35,15 @@ module RDF
         else super
         end
       end
+
+
+      #--------------------------------------------------------------------
+      # RDF::Transaction support
+      #
+      # TODO: Implement before_execute and after_execute.  Note that
+      # RDF::Transaction can only operate on a single graph at a time.  The
+      # RDF.rb transaction API is still pretty weak, and it is expected to
+      # be refined over the course of the RDF.rb 0.3.x series.
 
 
       #--------------------------------------------------------------------
