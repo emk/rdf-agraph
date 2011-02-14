@@ -60,6 +60,10 @@ module RDF
       # RDF::Transaction can only operate on a single graph at a time.  The
       # RDF.rb transaction API is still pretty weak, and it is expected to
       # be refined over the course of the RDF.rb 0.3.x series.
+      #
+      # Or should we implement the methods described here?
+      # http://blog.datagraph.org/2010/12/rdf-for-ruby It's not clear how
+      # we should tackle this.
 
 
       #--------------------------------------------------------------------
