@@ -228,7 +228,7 @@ module RDF
       end
 
       # Ask AllegroGraph to generate a series of blank node IDs.
-      def genetate_blank_nodes(amount)
+      def generate_blank_nodes(amount)
         response = @server.request_http(:post, "#{@repo.path}/blankNodes",
                                         :parameters => { :amount => amount },
                                         :expected_status_code => 200)
@@ -239,7 +239,7 @@ module RDF
       # maintain its identity across requests.
       def allocate_blank_node
         if @blank_nodes.empty?
-          @blank_nodes = genetate_blank_nodes(@blank_nodes_to_generate).reverse
+          @blank_nodes = generate_blank_nodes(@blank_nodes_to_generate).reverse
           @blank_nodes_to_generate *= 2
         end
         @blank_nodes.pop
