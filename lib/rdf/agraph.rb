@@ -10,6 +10,22 @@ module RDF
     # should work without any problems, but exercise caution when using the
     # Unix 'fork' function (as called by Unicorn, Spork, or other
     # high-performance Ruby libraries).
+    #--
+    #
+    # For comparison purposes, here's a list of other RDF::Repository
+    # implementations:
+    #
+    # https://github.com/fumi/rdf-4store/blob/master/lib/rdf/four_store/repository.rb
+    # https://github.com/bendiken/rdf-bert/blob/master/lib/rdf/bert/client.rb
+    # https://github.com/bendiken/rdf-cassandra/blob/master/lib/rdf/cassandra/repository.rb (more complete than many)
+    # https://github.com/bhuga/rdf-do/blob/master/lib/rdf/do.rb
+    # https://github.com/pius/rdf-mongo/blob/master/lib/rdf/mongo.rb
+    # https://github.com/njh/rdf-redstore/blob/master/lib/rdf/redstore/repository.rb
+    # https://github.com/bendiken/rdf-sesame/blob/master/lib/rdf/sesame/repository.rb
+    # https://github.com/bhuga/rdf-talis/blob/master/lib/rdf/talis/repository.rb
+    # https://github.com/bendiken/sparql-client/blob/master/lib/sparql/client/repository.rb
+    #
+    # We actually stack up pretty well against this list.
     class Repository < RDF::Repository
 
 
@@ -145,6 +161,9 @@ module RDF
       end
 
       # Delete a single statement from the repository.
+      #
+      # TODO: Do we need to handle invalid statements here by turning them
+      # into queries and deleting all matching statements?
       def delete_statement(statement)
         delete_statements([statement])
       end
