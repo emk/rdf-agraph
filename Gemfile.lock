@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/emk/rdf.git
-  revision: 4ead07f01f2a2dc7452423a32493178ab62d2691
+  revision: 18202011d29e08b9349b13786be8d07223cdde4e
   specs:
     rdf (0.3.1)
       addressable (>= 2.2)
@@ -12,7 +12,7 @@ GEM
     agraph (0.1.4)
       transport (>= 1.0.0)
     diff-lcs (1.1.2)
-    json (1.4.6)
+    json (1.5.1)
     rake (0.8.7)
     rcov (0.9.9)
     rdf-spec (0.3.1)
@@ -26,6 +26,7 @@ GEM
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.5.0)
     transport (1.0.1)
+      json (>= 1.4.6)
 
 PLATFORMS
   ruby
