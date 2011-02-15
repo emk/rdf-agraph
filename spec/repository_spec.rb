@@ -22,7 +22,7 @@ describe RDF::AllegroGraph::Repository do
   # that we implement the standard API correctly.
   it_should_behave_like RDF_Repository
 
-  describe ".supports?" do
+  describe "#supports?" do
     it "returns true if passed :context" do
       @repository.supports?(:context).should == true
     end
