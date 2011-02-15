@@ -8,5 +8,6 @@ group :development do
   gem 'rdf-spec'
   gem 'rspec'
   gem 'rake'
+  gem 'rcov'
 end
 

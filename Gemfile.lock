@@ -14,6 +14,7 @@ GEM
     diff-lcs (1.1.2)
     json (1.4.6)
     rake (0.8.7)
+    rcov (0.9.9)
     rdf-spec (0.3.1)
       rspec (>= 2.1)
     rspec (2.5.0)
@@ -33,6 +34,7 @@ DEPENDENCIES
   agraph
   json
   rake
+  rcov
   rdf!
   rdf-spec
   rspec
