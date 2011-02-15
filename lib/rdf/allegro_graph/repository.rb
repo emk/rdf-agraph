@@ -1,11 +1,12 @@
-# This code is based on http://blog.datagraph.org/2010/04/rdf-repository-howto
-
 module RDF::AllegroGraph
   # An AllegroGraph RDF repository.
   #
   # Note that this class does not interoperate well with the Unix `fork`
   # command if you're using blank nodes.  See README.md for details.
   class Repository < RDF::Repository
+    # This code is based on
+    # http://blog.datagraph.org/2010/04/rdf-repository-howto
+    #
     # For comparison purposes, here's a list of other RDF::Repository
     # implementations:
     #
