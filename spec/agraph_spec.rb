@@ -31,6 +31,16 @@ describe RDF::AllegroGraph::Repository do
 
   it_should_behave_like RDF_Repository
 
+  describe ".supports?" do
+    it "returns true if passed :context" do
+      @repository.supports?(:context).should == true
+    end
+
+    it "returns false if passed an unsupported feature" do
+      @repository.supports?(:no_such_feature).should == false
+    end
+  end
+
   context "with example data" do
     before :each do
       path = File.join(File.dirname(__FILE__), '..', 'etc', 'doap.nt')
