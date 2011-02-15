@@ -7,8 +7,8 @@ gem 'json' # This should be pulled in by agraph, but it isn't.
 group :development do
   gem 'rdf-spec'
   gem 'rspec'
-  gem 'rake'
-  gem 'rcov'
-  gem 'yard'
+  gem 'rake', :require => nil
+  gem 'rcov', :require => nil
+  gem 'yard', :require => nil
 end
 
