@@ -1,4 +1,4 @@
-# `rdf-agraph`: AllegroGraph adapter for RDF.rb
+# rdf-agraph: AllegroGraph adapter for RDF.rb
 
 **This code is a work-in-progress!** Your comments and questions are
 greatly appreciated, but you probably want to speak to me before using this
