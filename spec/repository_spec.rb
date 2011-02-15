@@ -1,13 +1,7 @@
 # This code is based on http://blog.datagraph.org/2010/04/rdf-repository-howto
 
-$: << File.join(File.dirname(__FILE__), "../lib")
-
-require 'rubygems'
-require 'bundler'
-Bundler.require(:default, :development)
-
+require 'spec_helper'
 require 'rdf/spec/repository'
-require 'rdf/agraph'
 
 RSpec::Matchers.define :include_solution do |hash|
   match do |solutions|
