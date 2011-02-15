@@ -57,6 +57,18 @@ describe RDF::AllegroGraph::Repository do
                                   :name => "Gregg Kellogg",
                                   :email => "mailto:gregg@kellogg-assoc.com")
       end
+
+      it "match optional patterns when appropriate" do
+        query = RDF::Query.new do |q|
+          q.pattern [:person, RDF.type, RDF::FOAF.Person]
+          q.pattern [:person, RDF::FOAF.made, :made], :optional => true
+        end
+        s = @repository.query(query)
+        s.should include_solution(:person => "http://ar.to/#self",
+                                  :made => "http://rubygems.org/gems/rdf")
+        s.should include_solution(:person => "http://bhuga.net/#ben")
+        s.should include_solution(:person => "http://kellogg-assoc.com/#me")
+      end
     end
   end
 end
