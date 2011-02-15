@@ -10,28 +10,34 @@ module RDF
     # should work without any problems, but exercise caution when using the
     # Unix 'fork' function (as called by Unicorn, Spork, or other
     # high-performance Ruby libraries).
-    #--
-    #
-    # For comparison purposes, here's a list of other RDF::Repository
-    # implementations:
-    #
-    # https://github.com/fumi/rdf-4store/blob/master/lib/rdf/four_store/repository.rb
-    # https://github.com/bendiken/rdf-bert/blob/master/lib/rdf/bert/client.rb
-    # https://github.com/bendiken/rdf-cassandra/blob/master/lib/rdf/cassandra/repository.rb (more complete than many)
-    # https://github.com/bhuga/rdf-do/blob/master/lib/rdf/do.rb
-    # https://github.com/pius/rdf-mongo/blob/master/lib/rdf/mongo.rb
-    # https://github.com/njh/rdf-redstore/blob/master/lib/rdf/redstore/repository.rb
-    # https://github.com/bendiken/rdf-sesame/blob/master/lib/rdf/sesame/repository.rb
-    # https://github.com/bhuga/rdf-talis/blob/master/lib/rdf/talis/repository.rb
-    # https://github.com/bendiken/sparql-client/blob/master/lib/sparql/client/repository.rb
-    #
-    # We actually stack up pretty well against this list.
     class Repository < RDF::Repository
+      # For comparison purposes, here's a list of other RDF::Repository
+      # implementations:
+      #
+      # https://github.com/fumi/rdf-4store/blob/master/lib/rdf/four_store/repository.rb
+      # https://github.com/bendiken/rdf-bert/blob/master/lib/rdf/bert/client.rb
+      # https://github.com/bendiken/rdf-cassandra/blob/master/lib/rdf/cassandra/repository.rb (more complete than many)
+      # https://github.com/bhuga/rdf-do/blob/master/lib/rdf/do.rb
+      # https://github.com/pius/rdf-mongo/blob/master/lib/rdf/mongo.rb
+      # https://github.com/njh/rdf-redstore/blob/master/lib/rdf/redstore/repository.rb
+      # https://github.com/bendiken/rdf-sesame/blob/master/lib/rdf/sesame/repository.rb
+      # https://github.com/bhuga/rdf-talis/blob/master/lib/rdf/talis/repository.rb
+      # https://github.com/bendiken/sparql-client/blob/master/lib/sparql/client/repository.rb
+      #
+      # We actually stack up pretty well against this list.
 
 
       #--------------------------------------------------------------------
-      # RDF::Repository methods
+      # @group RDF::Repository methods
 
+      # Create a new AllegroGraph repository adapter.
+      #
+      # @param [Hash{Symbol => Object}] options
+      # @option options [String]  :host ("localhost") Repository host.
+      # @option options [Integer] :port (10035)       Repository port.
+      # @option options [String]  :username (nil)     Log in as username.
+      # @option options [String]  :password (nil)     Log in with password.
+      # @option options [String]  :repository         Name of the repository.
       def initialize(options)
         repository = options[:repository]
         server_options = options.dup
@@ -45,6 +51,10 @@ module RDF
         @blank_nodes_server_to_local = {}
       end
 
+      # Returns true if `feature` is supported.
+      #
+      # @param [Symbol] feature
+      # @return [Boolean]
       def supports?(feature)
         case feature.to_sym
         when :context then true
@@ -54,7 +64,7 @@ module RDF
 
 
       #--------------------------------------------------------------------
-      # RDF::Transaction support
+      # @group RDF::Transaction support
       #
       # TODO: Implement before_execute and after_execute.  Note that
       # RDF::Transaction can only operate on a single graph at a time.  The
@@ -67,16 +77,24 @@ module RDF
 
 
       #--------------------------------------------------------------------
-      # RDF::Enumerable methods
+      # @group RDF::Enumerable methods
 
       # Iterate over all statements in the repository.  This is used by
       # RDF::Enumerable as a fallback for handling any unimplemented
       # methods.
+      #
+      # @yield [statement]
+      # @yieldparam [RDF::Statement] statement
+      # @yieldreturn [void]
+      # @return [void]
       def each(&block)
         query_pattern(RDF::Query::Pattern.new, &block)
       end
 
       # Does the repository contain the specified statement?
+      #
+      # @param [RDF::Statement] statement
+      # @return [Boolean]
       def has_statement?(statement)
         found = @repo.statements.find(statement_to_dict(statement))
         !found.empty?
@@ -90,7 +108,7 @@ module RDF
 
 
       #--------------------------------------------------------------------
-      # RDF::Countable methods
+      # @group RDF::Countable methods
       #
       # TODO: I'd love to override these methods for the sake of
       # performance, but RDF.rb does not want duplicate statements to be
@@ -110,9 +128,21 @@ module RDF
 
 
       #--------------------------------------------------------------------
-      # RDF::Queryable methods
+      # @group RDF::Queryable methods
 
-      # Return all RDF statements matching a pattern.
+      # Find all RDF statements matching a pattern.
+      #
+      # @overload query_pattern(pattern) {|statement| ... }
+      #   @yield statement
+      #   @yieldparam [RDF::Statement] statement
+      #   @yieldreturn [void]
+      #   @return [void]
+      #
+      # @overload query_pattern(pattern)
+      #   @return [Enumerator]
+      #
+      # @param [RDF::Query::Pattern] pattern A simple pattern to match.
+      # @return [void]
       def query_pattern(pattern)
         if block_given?
           seen = {}
@@ -139,14 +169,20 @@ module RDF
 
 
       #--------------------------------------------------------------------
-      # RDF::Mutable methods
+      # @group RDF::Mutable methods
 
       # Insert a single statement into the repository.
+      #
+      # @param [RDF::Statement] statement
+      # @return [void]
       def insert_statement(statement)
         insert_statements([statement])
       end
 
       # Insert multiple statements at once.
+      #
+      # @param [Array<RDF::Statement>] statements
+      # @return [void]
       def insert_statements(statements)
         # FIXME: RDF.rb expects duplicate statements to be ignored if
         # inserted into a mutable store, but AllegoGraph allows duplicate
@@ -166,13 +202,18 @@ module RDF
 
       # Delete a single statement from the repository.
       #
-      # TODO: Do we need to handle invalid statements here by turning them
-      # into queries and deleting all matching statements?
+      # @param [RDF::Statement] statement
+      # @return [void]
       def delete_statement(statement)
+        # TODO: Do we need to handle invalid statements here by turning them
+        # into queries and deleting all matching statements?
         delete_statements([statement])
       end
 
       # Delete multiple statements from the repository.
+      #
+      # @param [Array<RDF::Statement>] statements
+      # @return [void]
       def delete_statements(statements)
         json = statements_to_json(statements)
         @server.request_json(:post, "#{@repo.path}/statements/delete",
@@ -183,6 +224,8 @@ module RDF
       # having to first query for the matching records.
 
       # Clear all statements from the repository.
+      #
+      # @return [void]
       def clear
         @repo.statements.delete
       end

@@ -1,0 +1,10 @@
+--title "rdf-agraph: AllegroGraph repository adapter for RDF.rb"
+--output-dir doc/yard
+--no-private
+--hide-void-return
+--markup markdown
+--readme README.md
+-
+AUTHORS
+UNLICENSE
+VERSION

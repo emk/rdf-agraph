@@ -27,6 +27,7 @@ GEM
     rspec-mocks (2.5.0)
     transport (1.0.1)
       json (>= 1.4.6)
+    yard (0.6.4)
 
 PLATFORMS
   ruby
@@ -39,3 +40,4 @@ DEPENDENCIES
   rdf!
   rdf-spec
   rspec
+  yard
