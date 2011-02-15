@@ -10,6 +10,8 @@ RSpec::Matchers.define :include_solution do |hash|
 end
 
 describe RDF::AllegroGraph::Repository do
+  FOAF = RDF::FOAF
+
   before :each do
     @repository_options = {
       :username => 'test',
@@ -46,7 +48,7 @@ describe RDF::AllegroGraph::Repository do
     describe "#delete_statement (protected)" do
       it "deletes a single, valid statement" do
         stmt = RDF::Statement.new(RDF::URI("http://ar.to/#self"),
-                                  RDF::FOAF.mbox,
+                                  FOAF.mbox,
                                   RDF::URI("mailto:arto.bendiken@gmail.com"))
         @repository.should have_statement(stmt)
         # This method is protected, but we're required to override it.
@@ -61,9 +63,9 @@ describe RDF::AllegroGraph::Repository do
     describe "#query on a Basic Graph Pattern" do
       it "matches all required patterns" do
         query = RDF::Query.new do |q|
-          q.pattern [:person, RDF.type, RDF::FOAF.Person]
-          q.pattern [:person, RDF::FOAF.name, :name]
-          q.pattern [:person, RDF::FOAF.mbox, :email]
+          q.pattern [:person, RDF.type, FOAF.Person]
+          q.pattern [:person, FOAF.name, :name]
+          q.pattern [:person, FOAF.mbox, :email]
         end
         s = @repository.query(query)
         s.should include_solution(:person => "http://ar.to/#self",
@@ -79,8 +81,8 @@ describe RDF::AllegroGraph::Repository do
 
       it "match optional patterns when appropriate" do
         query = RDF::Query.new do |q|
-          q.pattern [:person, RDF.type, RDF::FOAF.Person]
-          q.pattern [:person, RDF::FOAF.made, :made], :optional => true
+          q.pattern [:person, RDF.type, FOAF.Person]
+          q.pattern [:person, FOAF.made, :made], :optional => true
         end
         s = @repository.query(query)
         s.should include_solution(:person => "http://ar.to/#self",
