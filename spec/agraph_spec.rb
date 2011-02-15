@@ -3,12 +3,10 @@
 $: << File.join(File.dirname(__FILE__), "../lib")
 
 require 'rubygems'
-gem 'bundler'
 require 'bundler'
-Bundler.require
+Bundler.require(:default, :development)
 
 require 'rdf/spec/repository'
-require 'rdf'
 require 'rdf/agraph'
 
 RSpec::Matchers.define :include_solution do |hash|

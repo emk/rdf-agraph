@@ -1,7 +1,12 @@
 source :rubygems
 
 gem 'rdf', :git => 'git://github.com/emk/rdf.git'
-gem 'rdf-spec'
-gem 'rspec'
 gem 'agraph'
 gem 'json'
+
+group :development do
+  gem 'rdf-spec'
+  gem 'rspec'
+  gem 'rake'
+end
+
