@@ -11,6 +11,7 @@ end
 
 describe RDF::AllegroGraph::Repository do
   FOAF = RDF::FOAF
+  EX = RDF::Vocabulary.new("http://example.com/")
 
   before :each do
     @repository_options = {
@@ -90,6 +91,22 @@ describe RDF::AllegroGraph::Repository do
         s.should include_solution(:person => "http://bhuga.net/#ben")
         s.should include_solution(:person => "http://kellogg-assoc.com/#me")
       end
+
+      # TODO: RDF::Query::Pattern doesn't really support contexts yet,
+      # so we can't try to match it.
+      #context "with contexts" do
+      #  before do
+      #    @repository.insert([EX.s1, EX.p, EX.o],
+      #                       [EX.s2, EX.p, EX.o, EX.c2])
+      #  end
+      #
+      #  it "matches statements with and without a context" do
+      #    query = RDF::Query.new {|q| q.pattern [:s, EX.p, EX.o] }
+      #    s = @repository.query(query)
+      #    s.should include_solution(:s => EX.s1)
+      #    s.should include_solution(:s => EX.s2)
+      #  end
+      #end
     end
 
     describe "blank node mapping" do
