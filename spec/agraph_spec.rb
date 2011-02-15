@@ -37,7 +37,7 @@ describe RDF::AllegroGraph::Repository do
       @repository.load(path)
     end
 
-    describe ".query" do
+    describe "#query" do
       it "match a Basic Graph Patterns" do
         query = RDF::Query.new do |q|
           q.pattern [:person, RDF.type, RDF::FOAF.Person]
