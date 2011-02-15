@@ -49,6 +49,17 @@ describe RDF::AllegroGraph::Repository do
       @repository.load(path)
     end
 
+    describe "#delete_statement" do
+      it "deletes a single, valid statement" do
+        stmt = RDF::Statement.new(RDF::URI("http://ar.to/#self"),
+                                  RDF::FOAF.mbox,
+                                  RDF::URI("mailto:arto.bendiken@gmail.com"))
+        @repository.should have_statement(stmt)
+        @repository.delete_statement(stmt)
+        @repository.should_not have_statement(stmt)
+      end
+    end
+
     describe "#query" do
       it "matches a Basic Graph Patterns" do
         query = RDF::Query.new do |q|
