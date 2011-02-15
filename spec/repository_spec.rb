@@ -92,6 +92,18 @@ describe RDF::AllegroGraph::Repository do
         s.should include_solution(:person => "http://kellogg-assoc.com/#me")
       end
 
+      it "runs AllegroGraph-specific queries" do
+        query = RDF::AllegroGraph::Query.new do |q|
+          q.pattern [:person, RDF.type, FOAF.Person]
+          q.pattern [:person, FOAF.made, :made], :optional => true
+        end
+        s = @repository.query(query)
+        s.should include_solution(:person => "http://ar.to/#self",
+                                  :made => "http://rubygems.org/gems/rdf")
+        s.should include_solution(:person => "http://bhuga.net/#ben")
+        s.should include_solution(:person => "http://kellogg-assoc.com/#me")
+      end
+
       # TODO: RDF::Query::Pattern doesn't really support contexts yet,
       # so we can't try to match it.
       #context "with contexts" do
