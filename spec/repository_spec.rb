@@ -120,4 +120,33 @@ describe RDF::AllegroGraph::Repository do
       end
     end
   end
+
+  describe "#serialize" do
+    it "transforms RDF::Value objects into strings" do
+      @repository.serialize(RDF::URI("http://example.com/")).should ==
+        "<http://example.com/>"
+      @repository.serialize(RDF::Literal.new("string")).should == "\"string\""
+    end
+
+    it "maps blank nodes to a server-specific representation" do
+      @repository.serialize(RDF::Node.intern('x')).should_not == "_:x"
+    end
+
+    it "serializes variables with a leading '?'" do
+      @repository.serialize(RDF::Query::Variable.new(:x)).should == "?x"
+    end
+  end
+
+  describe "#unserialize" do
+    it "transforms strings into RDF::Value objects" do
+      @repository.unserialize("<http://example.com/>").should ==
+        RDF::URI("http://example.com/")
+      @repository.unserialize("\"str\"").should == RDF::Literal.new("str")
+    end
+
+    it "maps blank node names back to their original values" do
+      blank = @repository.serialize(RDF::Node.intern('x'))
+      @repository.unserialize(blank).should == RDF::Node.intern('x')
+    end
+  end
 end

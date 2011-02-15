@@ -250,6 +250,32 @@ module RDF::AllegroGraph
       @repo.statements.delete
     end
 
+    #--------------------------------------------------------------------
+    # @group Serialization methods
+
+    # Serialize an RDF::Value for transmission to the server.  This
+    # is exported for low-level libraries that need to access our
+    # serialization and deserialization machinery, which has special-case
+    # support for RDF nodes.
+    #
+    # @param [RDF::Value,RDF::Query::Variable] value
+    # @return [String]
+    def serialize(value)
+      case value
+      when RDF::Query::Variable then value.to_s
+      else RDF::NTriples::Writer.serialize(map_to_server(value))
+      end
+    end
+
+    # Deserialize an RDF::Value received from the server.
+    #
+    # @param [String] str
+    # @return [RDF::Value]
+    # @see #serialize
+    def unserialize(str)
+      map_from_server(RDF::NTriples::Reader.unserialize(str))
+    end
+
     protected
 
     # Convert a list of statements to a JSON-compatible array.
@@ -273,19 +299,6 @@ module RDF::AllegroGraph
         # on all matching s,p,o triples regardless of context.
         :context => serialize(statement.context) || 'null'
       }
-    end
-
-    # Serialize an RDF::Node for transmission to the server.
-    def serialize(node)
-      case node
-      when RDF::Query::Variable then node.to_s
-      else RDF::NTriples::Writer.serialize(map_to_server(node))
-      end
-    end
-
-    # Deserialize an RDF::Node received from the server.
-    def unserialize(node)
-      map_from_server(RDF::NTriples::Reader.unserialize(node))
     end
 
     # Convert a query to SPARQL.
