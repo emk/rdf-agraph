@@ -95,9 +95,7 @@ describe RDF::AllegroGraph::Repository do
     describe "blank node mapping" do
       it "correctly handle blank nodes that originate in the repository" do
         @repository2 = RDF::AllegroGraph::Repository.new(@repository_options)
-        @repository2.each do |stmt|
-          @repository2.should have_statement(stmt)
-        end
+        @repository2.each {|stmt| @repository2.should have_statement(stmt) }
       end
     end
   end
