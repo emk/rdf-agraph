@@ -178,23 +178,9 @@ module RDF::AllegroGraph
       # TODO: Remove this once validate! is merged and released, and we
       # have a dependency on the appropriate version of the 'rdf' gem.
       query.validate! if query.respond_to?(:validate!)
-
       @repo.query.language = :sparql
       query_result = @repo.query.perform(query_to_sparql(query))
-
-      # Translate the SPARQL query results into an RDF::Query::Solutions
-      # object.
-      names = query_result['names'].map {|n| n.to_sym }
-      query_result['values'].each do |match|
-        hash = {}
-        names.each_with_index do |name, i|
-          # TODO: I'd like to include nil values, too, but
-          # RDF::Query#execute does not yet do so, so we'll filter them for
-          # now.
-          hash[name] = unserialize(match[i]) unless match[i].nil?
-        end
-        yield RDF::Query::Solution.new(hash)
-      end
+      json_to_query_solutions(query_result).each {|s| yield s }
     end
     protected :query_execute
 
@@ -321,6 +307,21 @@ module RDF::AllegroGraph
       "SELECT #{variables.join(" ")}\nWHERE {\n  #{patterns.join("\n  ")} }"
     end
 
+    # Convert a JSON query solution to a list of RDF::Query::Solution
+    # objects.
+    def json_to_query_solutions(json)
+      names = json['names'].map {|n| n.to_sym }
+      json['values'].map do |match|
+        hash = {}
+        names.each_with_index do |name, i|
+          # TODO: I'd like to include nil values, too, but
+          # RDF::Query#execute does not yet do so, so we'll filter them for
+          # now.
+          hash[name] = unserialize(match[i]) unless match[i].nil?
+        end
+        RDF::Query::Solution.new(hash)
+      end      
+    end
 
     # Return true if this a blank RDF node.
     def blank_node?(node)
