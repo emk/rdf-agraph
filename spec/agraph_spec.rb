@@ -29,6 +29,8 @@ describe RDF::AllegroGraph::Repository do
     @repository.clear
   end
 
+  # This pulls in a huge number of specifications from rdf-spec, ensuring
+  # that we implement the standard API correctly.
   it_should_behave_like RDF_Repository
 
   describe ".supports?" do
@@ -48,7 +50,7 @@ describe RDF::AllegroGraph::Repository do
     end
 
     describe "#query" do
-      it "match a Basic Graph Patterns" do
+      it "matches a Basic Graph Patterns" do
         query = RDF::Query.new do |q|
           q.pattern [:person, RDF.type, RDF::FOAF.Person]
           q.pattern [:person, RDF::FOAF.name, :name]
