@@ -337,8 +337,8 @@ module RDF::AllegroGraph
     end
 
     # Return true if this a blank RDF node.
-    def blank_node?(node)
-      !node.nil? && node.anonymous?
+    def blank_node?(value)
+      !value.nil? && value.anonymous?
     end
 
     # Ask AllegroGraph to generate a series of blank node IDs.
@@ -367,28 +367,28 @@ module RDF::AllegroGraph
       @blank_nodes_server_to_local[server_id] = local_id
     end
 
-    # Translate this node to a server-specific representation, taking
+    # Translate this value to a server-specific representation, taking
     # care to handle blank nodes correctly.
-    def map_to_server(node)
-      return node unless blank_node?(node)
-      unless @blank_nodes_local_to_server.has_key?(node.id)
+    def map_to_server(value)
+      return value unless blank_node?(value)
+      unless @blank_nodes_local_to_server.has_key?(value.id)
         new_id = allocate_blank_node
-        map_blank_node(node.id, new_id)
+        map_blank_node(value.id, new_id)
       end
-      RDF::Node.new(@blank_nodes_local_to_server[node.id])
+      RDF::Node.new(@blank_nodes_local_to_server[value.id])
     end
 
-    # Translate this node to a client-specific representation, taking
+    # Translate this value to a client-specific representation, taking
     # care to handle blank nodes correctly.
-    def map_from_server(node)
-      return node unless blank_node?(node)
-      if @blank_nodes_server_to_local.has_key?(node.id)
-        RDF::Node.new(@blank_nodes_server_to_local[node.id])
+    def map_from_server(value)
+      return value unless blank_node?(value)
+      if @blank_nodes_server_to_local.has_key?(value.id)
+        RDF::Node.new(@blank_nodes_server_to_local[value.id])
       else
         # We didn't generate this node ID, so we want to pass it back to
         # the server unchanged.
-        map_blank_node(node.id, node.id)
-        node
+        map_blank_node(value.id, value.id)
+        value
       end
     end
   end
