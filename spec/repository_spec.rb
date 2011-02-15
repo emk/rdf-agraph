@@ -10,16 +10,8 @@ RSpec::Matchers.define :include_solution do |hash|
 end
 
 describe RDF::AllegroGraph::Repository do
-  FOAF = RDF::FOAF
-  EX = RDF::Vocabulary.new("http://example.com/")
-
   before :each do
-    @repository_options = {
-      :username => 'test',
-      :password => 'test',
-      :repository => 'rdf_agraph_test'
-    }
-    @repository = RDF::AllegroGraph::Repository.new(@repository_options)
+    @repository = RDF::AllegroGraph::Repository.new(REPOSITORY_OPTIONS)
   end
 
   after :each do
@@ -123,7 +115,7 @@ describe RDF::AllegroGraph::Repository do
 
     describe "blank node mapping" do
       it "correctly handle blank nodes that originate in the repository" do
-        @repository2 = RDF::AllegroGraph::Repository.new(@repository_options)
+        @repository2 = RDF::AllegroGraph::Repository.new(REPOSITORY_OPTIONS)
         @repository2.each {|stmt| @repository2.should have_statement(stmt) }
       end
     end
