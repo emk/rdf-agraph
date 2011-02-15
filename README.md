@@ -4,6 +4,9 @@
 greatly appreciated, but you probably want to speak to me before using this
 code.
 
+This code is a wrapper around phifty's `agraph` gem:
+https://github.com/phifty/agraph
+
 ## Examples
 
 To connect to an AllegroGraph repository, call:
