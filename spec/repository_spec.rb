@@ -58,8 +58,8 @@ describe RDF::AllegroGraph::Repository do
       end
     end
 
-    describe "#query" do
-      it "matches a Basic Graph Patterns" do
+    describe "#query on a Basic Graph Pattern" do
+      it "matches all required patterns" do
         query = RDF::Query.new do |q|
           q.pattern [:person, RDF.type, RDF::FOAF.Person]
           q.pattern [:person, RDF::FOAF.name, :name]

@@ -173,10 +173,51 @@ module RDF::AllegroGraph
     #
     # @see    RDF::Queryable#query
     # @see    RDF::Query#execute
-    #def query_execute(query)
-    #  
-    #end
-    #protected :query_execute
+    def query_execute(query)
+      # Make sure the query is valid.
+      # TODO: Remove this once validate! is merged and released, and we
+      # have a dependency on the appropriate version of the 'rdf' gem.
+      query.validate! if query.respond_to?(:validate!)
+
+      # Collect fragements of our SPARQL query.
+      variables = []
+      patterns = []
+      query.patterns.each do |p|
+        p.variables.each {|v| variables << v[1] unless variables.include?(v[1]) }
+        triple = [p.subject, p.predicate, p.object]
+        str = triple.map {|v| serialize(v) }.join(" ")
+        # TODO: Wrap in graph block for context!
+        if p.optional?
+          patterns << "OPTIONAL { #{str} }"
+        else
+          patterns << "#{str} ."
+        end
+      end
+
+      # Build and run the SPARQL query.
+      sparql = <<"EOD"
+SELECT #{variables.join(" ")}
+WHERE {
+  #{patterns.join("\n  ")} }
+EOD
+      @repo.query.language = :sparql
+      query_result = @repo.query.perform(sparql)
+
+      # Translate the SPARQL query results into an RDF::Query::Solutions
+      # object.
+      names = query_result['names'].map {|n| n.to_sym }
+      query_result['values'].each do |match|
+        hash = {}
+        names.each_with_index do |name, i|
+          # TODO: I'd like to include nil values, too, but
+          # RDF::Query#execute does not yet do so, so we'll filter them for
+          # now.
+          hash[name] = unserialize(match[i]) unless match[i].nil?
+        end
+        yield RDF::Query::Solution.new(hash)
+      end
+    end
+    protected :query_execute
 
     #--------------------------------------------------------------------
     # @group RDF::Mutable methods
@@ -271,7 +312,10 @@ module RDF::AllegroGraph
 
     # Serialize an RDF::Node for transmission to the server.
     def serialize(node)
-      RDF::NTriples::Writer.serialize(map_to_server(node))
+      case node
+      when RDF::Query::Variable then node.to_s
+      else RDF::NTriples::Writer.serialize(map_to_server(node))
+      end
     end
 
     # Deserialize an RDF::Node received from the server.
