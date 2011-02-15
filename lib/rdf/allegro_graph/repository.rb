@@ -179,29 +179,8 @@ module RDF::AllegroGraph
       # have a dependency on the appropriate version of the 'rdf' gem.
       query.validate! if query.respond_to?(:validate!)
 
-      # Collect fragements of our SPARQL query.
-      variables = []
-      patterns = []
-      query.patterns.each do |p|
-        p.variables.each {|v| variables << v[1] unless variables.include?(v[1]) }
-        triple = [p.subject, p.predicate, p.object]
-        str = triple.map {|v| serialize(v) }.join(" ")
-        # TODO: Wrap in graph block for context!
-        if p.optional?
-          patterns << "OPTIONAL { #{str} }"
-        else
-          patterns << "#{str} ."
-        end
-      end
-
-      # Build and run the SPARQL query.
-      sparql = <<"EOD"
-SELECT #{variables.join(" ")}
-WHERE {
-  #{patterns.join("\n  ")} }
-EOD
       @repo.query.language = :sparql
-      query_result = @repo.query.perform(sparql)
+      query_result = @repo.query.perform(query_to_sparql(query))
 
       # Translate the SPARQL query results into an RDF::Query::Solutions
       # object.
@@ -322,6 +301,26 @@ EOD
     def unserialize(node)
       map_from_server(RDF::NTriples::Reader.unserialize(node))
     end
+
+    # Convert a query to SPARQL.
+    def query_to_sparql(query)
+      variables = []
+      patterns = []
+      query.patterns.each do |p|
+        p.variables.each do |v|
+          variables << v[1] unless variables.include?(v[1])
+        end
+        triple = [p.subject, p.predicate, p.object]
+        str = triple.map {|v| serialize(v) }.join(" ")
+        # TODO: Wrap in graph block for context!
+        if p.optional?
+          str = "OPTIONAL { #{str} }"
+        end
+        patterns << "#{str} ."
+      end
+      "SELECT #{variables.join(" ")}\nWHERE {\n  #{patterns.join("\n  ")} }"
+    end
+
 
     # Return true if this a blank RDF node.
     def blank_node?(node)
