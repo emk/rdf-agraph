@@ -159,10 +159,24 @@ module RDF::AllegroGraph
         ::Enumerable::Enumerator.new(self, :query_pattern, pattern)
       end        
     end
+    protected :query_pattern
 
     # TODO: Override first, first_subject, first_predicate, first_object,
     # first_literal for performance.
 
+    # Run an RDF::Query on the server.
+    #
+    # @param [RDF::Query] query The query to execute.
+    # @yield solution
+    # @yieldparam [RDF::Query::Solution] solution
+    # @yieldreturn [void]
+    #
+    # @see    RDF::Queryable#query
+    # @see    RDF::Query#execute
+    #def query_execute(query)
+    #  
+    #end
+    #protected :query_execute
 
     #--------------------------------------------------------------------
     # @group RDF::Mutable methods
@@ -174,6 +188,7 @@ module RDF::AllegroGraph
     def insert_statement(statement)
       insert_statements([statement])
     end
+    protected :insert_statement
 
     # Insert multiple statements at once.
     #
@@ -195,6 +210,7 @@ module RDF::AllegroGraph
       @server.request_json(:post, "#{@repo.path}/statements", :body => json,
                            :expected_status_code => 204)
     end
+    protected :insert_statements
 
     # Delete a single statement from the repository.
     #
@@ -205,6 +221,7 @@ module RDF::AllegroGraph
       # into queries and deleting all matching statements?
       delete_statements([statement])
     end
+    protected :delete_statement
 
     # Delete multiple statements from the repository.
     #
@@ -215,6 +232,7 @@ module RDF::AllegroGraph
       @server.request_json(:post, "#{@repo.path}/statements/delete",
                            :body => json, :expected_status_code => 204)
     end
+    protected :delete_statements
 
     # TODO: Override delete to implement fast wildcard deletion without
     # having to first query for the matching records.

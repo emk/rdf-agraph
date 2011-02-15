@@ -43,13 +43,17 @@ describe RDF::AllegroGraph::Repository do
       @repository.load(path)
     end
 
-    describe "#delete_statement" do
+    describe "#delete_statement (protected)" do
       it "deletes a single, valid statement" do
         stmt = RDF::Statement.new(RDF::URI("http://ar.to/#self"),
                                   RDF::FOAF.mbox,
                                   RDF::URI("mailto:arto.bendiken@gmail.com"))
         @repository.should have_statement(stmt)
-        @repository.delete_statement(stmt)
+        # This method is protected, but we're required to override it.
+        # Unfortuantely, because we also override delete_statements,
+        # there's no way for it to get called using public APIs.  So we
+        # bypass the 'protected' restriction using 'send'.
+        @repository.send(:delete_statement, stmt)
         @repository.should_not have_statement(stmt)
       end
     end
