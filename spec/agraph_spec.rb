@@ -17,12 +17,12 @@ end
 
 describe RDF::AllegroGraph::Repository do
   before :each do
-    options = {
+    @repository_options = {
       :username => 'test',
       :password => 'test',
       :repository => 'rdf_agraph_test'
     }
-    @repository = RDF::AllegroGraph::Repository.new(options)
+    @repository = RDF::AllegroGraph::Repository.new(@repository_options)
   end
 
   after :each do
@@ -89,6 +89,15 @@ describe RDF::AllegroGraph::Repository do
                                   :made => "http://rubygems.org/gems/rdf")
         s.should include_solution(:person => "http://bhuga.net/#ben")
         s.should include_solution(:person => "http://kellogg-assoc.com/#me")
+      end
+    end
+
+    describe "blank node mapping" do
+      it "correctly handle blank nodes that originate in the repository" do
+        @repository2 = RDF::AllegroGraph::Repository.new(@repository_options)
+        @repository2.each do |stmt|
+          @repository2.should have_statement(stmt)
+        end
       end
     end
   end
