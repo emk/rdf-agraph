@@ -153,17 +153,4 @@ EOD
       @repository.serialize(RDF::Query::Variable.new(:x)).should == "?x"
     end
   end
-
-  describe "#unserialize" do
-    it "transforms strings into RDF::Value objects" do
-      @repository.unserialize("<http://example.com/>").should ==
-        RDF::URI("http://example.com/")
-      @repository.unserialize("\"str\"").should == RDF::Literal.new("str")
-    end
-
-    it "maps blank node names back to their original values" do
-      blank = @repository.serialize(RDF::Node.intern('x'))
-      @repository.unserialize(blank).should == RDF::Node.intern('x')
-    end
-  end
 end
