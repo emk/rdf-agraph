@@ -26,13 +26,27 @@ module RDF::AllegroGraph
       result = {}
       @server.request_json(:get, path(:repositories),
                            :expected_status_code => 200).each do |repo|
-        result[repo['id']] = repository(repo['id'])
+        result[repo['id']] = Repository.new(:server => self, :id => repo['id'])
       end
       result
     end
 
-    def repository(id)
-      Repository.new(:server => self, :id => id)
+    def has_repository?(id)
+      repositories.has_key?(id)
+    end
+
+    def each_repository(&block)
+      repositories.values.each(&block)
+    end
+    alias_method :each, :each_repository
+
+    def repository(id, options={})
+      result = repositories[id]
+      if result.nil? && options[:create]
+        ::AllegroGraph::Repository.new(self, id).create!
+        result = Repository.new(:server => self, :id => id)
+      end
+      result
     end
     alias_method :[], :repository
   end

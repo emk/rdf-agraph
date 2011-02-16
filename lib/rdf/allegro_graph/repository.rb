@@ -34,7 +34,6 @@ module RDF::AllegroGraph
     def initialize(options)
       @server = options[:server].server
       @repo = ::AllegroGraph::Repository.new(@server, options[:id])
-      @repo.create_if_missing!
       @blank_nodes = []
       @blank_nodes_to_generate = 8
       @blank_nodes_local_to_server = {}

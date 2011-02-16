@@ -27,30 +27,27 @@ describe RDF::AllegroGraph::Server do
     end
 
     it "indicates whether a repository exists" do
-      pending
       @server.should respond_to(:has_repository?)
-      @server.has_repository?(:SYSTEM).should be_true
+      @server.has_repository?(REPOSITORY_OPTIONS[:id]).should be_true
       @server.has_repository?(:foobar).should be_false
     end
 
     it "returns existing repositories" do
       @server.should respond_to(:repository, :[])
-      repository = @server.repository(:SYSTEM)
+      repository = @server.repository(REPOSITORY_OPTIONS[:id])
       repository.should_not be_nil
       repository.should be_instance_of(RDF::AllegroGraph::Repository)
     end
 
     it "does not return nonexistent repositories" do
-      pending
       lambda { @server.repository(:foobar) }.should_not raise_error
       repository = @server.repository(:foobar)
       repository.should be_nil
     end
 
     it "supports enumerating repositories" do
-      pending
       @server.should respond_to(:each_repository, :each)
-      @server.each_repository.should be_an_enumerator
+      # @server.each_repository.should be_an_enumerator
       @server.each_repository do |repository|
         repository.should be_instance_of(RDF::AllegroGraph::Repository)
       end

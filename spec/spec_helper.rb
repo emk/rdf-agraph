@@ -14,6 +14,7 @@ REPOSITORY_OPTIONS = {
   :server => RDF::AllegroGraph::Server.new("http://test:test@localhost:10035"),
   :id => 'rdf_agraph_test'
 }
+REPOSITORY_OPTIONS[:server].repository("rdf_agraph_test", :create => true)
 
 # RDF vocabularies.
 FOAF = RDF::FOAF
