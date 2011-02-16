@@ -2,6 +2,8 @@ module RDF::AllegroGraph
 
   # A query with AllegroGraph-specific extensions.
   class Query < RDF::Query
+    autoload :Relation, 'rdf/allegro_graph/query/relation'
+
     # Convert this query to AllegoGraph Prolog notation.
     #
     # @param [RDF::AllegroGraph::Repository] repository
