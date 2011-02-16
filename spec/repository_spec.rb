@@ -1,5 +1,3 @@
-# This code is based on http://blog.datagraph.org/2010/04/rdf-repository-howto
-
 require 'spec_helper'
 
 describe RDF::AllegroGraph::Repository do
