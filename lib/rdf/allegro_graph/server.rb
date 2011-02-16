@@ -9,7 +9,12 @@ module RDF::AllegroGraph
         :username => parsed.user, :password => parsed.password
       }
       @server = AllegroGraph::Server.new(options)
-      @path = parsed.path
+      
+      unless parsed.path.nil? || parsed.path.empty? || parsed.path == "/"
+        puts parsed.path.inspect
+        err = "AllegroGraph URLs with paths not supported: #{url}"
+        raise ArgumentError.new(err)
+      end
     end
 
     def path(more_path=nil)
