@@ -17,7 +17,6 @@ describe RDF::AllegroGraph::Server do
     end
 
     it "returns available repositories" do
-      pending
       @server.should respond_to(:repositories)
       @server.repositories.should be_a_kind_of(Enumerable)
       @server.repositories.should be_instance_of(Hash)
@@ -35,7 +34,6 @@ describe RDF::AllegroGraph::Server do
     end
 
     it "returns existing repositories" do
-      pending
       @server.should respond_to(:repository, :[])
       repository = @server.repository(:SYSTEM)
       repository.should_not be_nil

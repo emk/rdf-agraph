@@ -21,5 +21,19 @@ module RDF::AllegroGraph
                            :expected_status_code => 200).to_i
     end
     alias_method :protocol_version, :protocol
+
+    def repositories
+      result = {}
+      @server.request_json(:get, path(:repositories),
+                           :expected_status_code => 200).each do |repo|
+        result[repo['id']] = repository(repo['id'])
+      end
+      result
+    end
+
+    def repository(id)
+      Repository.new(:server => self, :id => id)
+    end
+    alias_method :[], :repository
   end
 end
