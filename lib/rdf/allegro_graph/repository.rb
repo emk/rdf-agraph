@@ -314,10 +314,24 @@ module RDF::AllegroGraph
     #
     # @param [RDF::Value,RDF::Query::Variable] value
     # @return [String]
+    # @see #serialize_prolog
     def serialize(value)
       case value
       when RDF::Query::Variable then value.to_s
       else RDF::NTriples::Writer.serialize(map_to_server(value))
+      end
+    end
+
+    # Serialize an RDF::Value for use in a Prolog expression that will
+    # be transmitted to the server.
+    #
+    # @param [RDF::Value,RDF::Query::Variable] value
+    # @return [String]
+    # @see #serialize
+    def serialize_prolog(value)
+      case value
+      when RDF::Query::Variable then value.to_s
+      else "!#{serialize(value)}"
       end
     end
 

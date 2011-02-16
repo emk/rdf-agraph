@@ -153,4 +153,16 @@ EOD
       @repository.serialize(RDF::Query::Variable.new(:x)).should == "?x"
     end
   end
+
+  describe "#serialize_prolog" do
+    it "prefixes RDF values with an !" do
+      @repository.serialize_prolog(RDF::URI("http://example.com/")).should ==
+        "!<http://example.com/>"
+      @repository.serialize_prolog(RDF::Literal.new("foo")).should == "!\"foo\""
+    end
+
+    it "serializes variables without a leading !" do
+      @repository.serialize_prolog(RDF::Query::Variable.new(:x)).should == "?x"
+    end
+  end
 end

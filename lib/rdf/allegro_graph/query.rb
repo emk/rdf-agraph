@@ -24,12 +24,7 @@ module RDF::AllegroGraph
         end
 
         triple = [p.subject, p.predicate, p.object]
-        str = triple.map do |value|
-          case value
-          when RDF::Query::Variable then value.to_s
-          else "!#{repository.serialize(value)}"
-          end
-        end.join(" ")
+        str = triple.map {|v| repository.serialize_prolog(v) }.join(" ")
         pattern_strs << "(q- #{str})"
       end
       "(select (#{variables.join(" ")})\n  #{pattern_strs.join("\n  ")})"
