@@ -32,9 +32,7 @@ module RDF::AllegroGraph
         end
 
         # Extract any new variables we see in the query.
-        p.variables.each do |v|
-          variables << v[1] unless variables.include?(v[1])
-        end
+        p.variables.each {|_,v| variables << v unless variables.include?(v) }
 
         triple = [p.subject, p.predicate, p.object]
         str = triple.map {|v| repository.serialize_prolog(v) }.join(" ")
