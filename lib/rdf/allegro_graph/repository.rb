@@ -173,20 +173,16 @@ module RDF::AllegroGraph
     #
     # @see    RDF::Queryable#query
     # @see    RDF::Query#execute
-    def query_execute(query)
+    def query_execute(query, &block)
       # Make sure the query is valid.
       # TODO: Remove this once validate! is merged and released, and we
       # have a dependency on the appropriate version of the 'rdf' gem.
       query.validate! if query.respond_to?(:validate!)
-      query_result = 
-        if query.respond_to?(:to_prolog)
-          @repo.query.language = :prolog
-          @repo.query.perform(query.to_prolog(self))
-        else
-          @repo.query.language = :sparql
-          @repo.query.perform(query_to_sparql(query))
-        end
-      json_to_query_solutions(query_result).each {|s| yield s }
+      if query.respond_to?(:to_prolog)
+        prolog_query(query.to_prolog(self), &block)
+      else
+        sparql_query(query_to_sparql(query), &block)
+      end
     end
     protected :query_execute
 
