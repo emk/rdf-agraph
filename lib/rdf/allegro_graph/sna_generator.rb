@@ -3,7 +3,8 @@ module RDF::AllegroGraph
     attr_reader :name
     attr_reader :options
 
-    def initialize(name, options)
+    def initialize(repository, name, options)
+      @repository = repository
       @name = name
       @options = options
     end
@@ -22,8 +23,10 @@ module RDF::AllegroGraph
       if @options.has_key?(option_name)
         value = @options[option_name]
         case value
-        when Array then { param_name => value.map {|v| v.to_s } }
-        else { param_name => value.to_s }
+        when Array
+          { param_name => value.map {|v| @repository.serialize(v) } }
+        else
+          { param_name => @repository.serialize(value) }
         end
       else
         {}
