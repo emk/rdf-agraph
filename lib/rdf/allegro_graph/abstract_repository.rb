@@ -323,6 +323,7 @@ module RDF::AllegroGraph
     # @see #serialize
     def serialize_prolog(value)
       case value
+      when RDF::AllegroGraph::Query::PrologLiteral then value.to_s
       when RDF::Query::Variable then value.to_s
       else "!#{serialize(value)}"
       end

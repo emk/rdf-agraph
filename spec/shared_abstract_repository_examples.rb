@@ -153,5 +153,10 @@ EOD
     it "serializes variables without a leading !" do
       @repository.serialize_prolog(RDF::Query::Variable.new(:x)).should == "?x"
     end
+
+    it "serializes Prolog literals" do
+      literal = RDF::AllegroGraph::Query::PrologLiteral.new(:foo)
+      @repository.serialize_prolog(literal).should == "foo"
+    end
   end
 end
