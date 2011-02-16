@@ -2,6 +2,7 @@ module RDF::AllegroGraph
 
   # A query with AllegroGraph-specific extensions.
   class Query < RDF::Query
+    autoload :PrologLiteral, 'rdf/allegro_graph/query/prolog_literal'
     autoload :Relation, 'rdf/allegro_graph/query/relation'
 
     # Add a relation to this query.  Relations can only be used in Prolog
