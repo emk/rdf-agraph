@@ -6,7 +6,7 @@ module RDF::AllegroGraph
     #
     # @param [RDF::AllegroGraph::Repository] repository
     # @return [String]
-    # @note This method is experimental, and may change substantially.
+    # @private
     def to_prolog(repository)
       variables = []
       pattern_strs = []

@@ -267,7 +267,7 @@ module RDF::AllegroGraph
     #
     # @param [RDF::Value,RDF::Query::Variable] value
     # @return [String]
-    # @note This method is experimental, and may change substantially.
+    # @private
     def serialize(value)
       case value
       when RDF::Query::Variable then value.to_s
@@ -280,7 +280,7 @@ module RDF::AllegroGraph
     # @param [String] str
     # @return [RDF::Value]
     # @see #serialize
-    # @note This method is experimental, and may change substantially.
+    # @private
     def unserialize(str)
       map_from_server(RDF::NTriples::Reader.unserialize(str))
     end
