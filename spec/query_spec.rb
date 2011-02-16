@@ -38,5 +38,15 @@ describe RDF::AllegroGraph::Query do
   (q- ?person !<http://xmlns.com/foaf/0.1/mbox> !"mailto:jsmith@example.com"))
 EOD
     end
+
+    it "converts relations to function calls" do
+      query = RDF::AllegroGraph::Query.new do |q|
+        q.relation 'ego-group-member', EX.me, 2, FOAF.knows, :person
+      end
+      query.to_prolog(@repository).should == <<EOD.chomp
+(select (?person)
+  (ego-group-member !<http://example.com/me> !"2"^^<http://www.w3.org/2001/XMLSchema#integer> !<http://xmlns.com/foaf/0.1/knows> ?person))
+EOD
+    end
   end
 end

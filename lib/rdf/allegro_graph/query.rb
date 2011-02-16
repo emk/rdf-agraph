@@ -24,21 +24,32 @@ module RDF::AllegroGraph
     # @private
     def to_prolog(repository)
       variables = []
-      pattern_strs = []
+      relations = []
       patterns.each do |p|
-        # We don't translate these queries to Prolog yet.
-        if p.optional? || p.context
-          raise ArgumentError.new("Don't know how to handle #{p}")
-        end
-
         # Extract any new variables we see in the query.
         p.variables.each {|_,v| variables << v unless variables.include?(v) }
-
-        triple = [p.subject, p.predicate, p.object]
-        str = triple.map {|v| repository.serialize_prolog(v) }.join(" ")
-        pattern_strs << "(q- #{str})"
+        relations << convert_to_relation(p).to_prolog(repository)
       end
-      "(select (#{variables.join(" ")})\n  #{pattern_strs.join("\n  ")})"
+      "(select (#{variables.join(" ")})\n  #{relations.join("\n  ")})"
+    end
+
+    protected
+
+    # Convert patterns to relations (and leave relations unchanged).
+    #
+    # @param [RDF::Query::Pattern,Relation] pattern_or_relation
+    # @return [Relation]
+    # @private
+    def convert_to_relation(pattern_or_relation)
+      case pattern_or_relation
+      when Relation then pattern_or_relation
+      else
+      p = pattern_or_relation
+        if p.optional? || p.context
+          raise ArgumentError.new("Can't translate #{p} to Prolog relation")
+        end
+        Relation.new('q-', p.subject, p.predicate, p.object)
+      end
     end
   end
 end
