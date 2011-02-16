@@ -1,11 +1,6 @@
 module RDF::AllegroGraph
   # An AllegroGraph RDF repository.
   class Repository < AbstractRepository
-
-
-    #--------------------------------------------------------------------
-    # @group RDF::Repository methods
-
     # Create a new AllegroGraph repository adapter.
     #
     # @param [Hash{Symbol => Object}] options
@@ -22,7 +17,5 @@ module RDF::AllegroGraph
     def session
       Session.new(@repo)
     end
-
-    protected
   end
 end
