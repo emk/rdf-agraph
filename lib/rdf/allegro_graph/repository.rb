@@ -29,17 +29,11 @@ module RDF::AllegroGraph
     # Create a new AllegroGraph repository adapter.
     #
     # @param [Hash{Symbol => Object}] options
-    # @option options [String]  :host ("localhost") Repository host.
-    # @option options [Integer] :port (10035)       Repository port.
-    # @option options [String]  :username (nil)     Log in as username.
-    # @option options [String]  :password (nil)     Log in with password.
-    # @option options [String]  :repository         Name of the repository.
+    # @option options [Server]  :server  The server hosting the repository.
+    # @option options [String]  :id      The name of the repository.
     def initialize(options)
-      repository = options[:repository]
-      server_options = options.dup
-      server_options.delete(:repository)
-      @server = ::AllegroGraph::Server.new(server_options)
-      @repo = ::AllegroGraph::Repository.new(@server, repository)
+      @server = options[:server].server
+      @repo = ::AllegroGraph::Repository.new(@server, options[:id])
       @repo.create_if_missing!
       @blank_nodes = []
       @blank_nodes_to_generate = 8

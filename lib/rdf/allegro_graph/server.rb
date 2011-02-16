@@ -1,5 +1,7 @@
 module RDF::AllegroGraph
   class Server
+    attr_reader :server # @private
+
     def initialize(url="http://localhost:10035")
       parsed = URI.parse(url)
       options = {

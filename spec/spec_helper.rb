@@ -11,9 +11,8 @@ require 'rdf-agraph'
 
 # Options that we use to connect to a repository.
 REPOSITORY_OPTIONS = {
-  :username => 'test',
-  :password => 'test',
-  :repository => 'rdf_agraph_test'
+  :server => RDF::AllegroGraph::Server.new("http://test:test@localhost:10035"),
+  :id => 'rdf_agraph_test'
 }
 
 # RDF vocabularies.
