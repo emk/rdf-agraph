@@ -24,4 +24,16 @@ describe RDF::AllegroGraph::Query::Relation do
       subject.variables[:person].should be_instance_of(RDF::Query::Variable)
     end
   end
+
+  describe "#to_prolog" do
+    before do
+      @repository = RDF::AllegroGraph::Repository.new(REPOSITORY_OPTIONS)
+    end
+
+    it "serializes a relation as a Prolog query term" do
+      subject.to_prolog(@repository).should == <<EOD.chomp
+(ego-group-member !<http://example.com/me> !"2"^^<http://www.w3.org/2001/XMLSchema#integer> !<http://xmlns.com/foaf/0.1/knows> ?person)
+EOD
+    end
+  end
 end

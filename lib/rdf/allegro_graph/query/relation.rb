@@ -42,5 +42,15 @@ class RDF::AllegroGraph::Query
       end
       result
     end
+
+    # Convert this relation to a Prolog Lisp expression.
+    #
+    # @param [RDF::AllegroGraph::Repository] repository
+    # @return [String]
+    # @private
+    def to_prolog(repository)
+      args = arguments.map {|a| repository.serialize_prolog(a) }
+      "(#{name} #{args.join(" ")})"
+    end
   end
 end
