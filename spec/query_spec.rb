@@ -14,6 +14,16 @@ describe RDF::AllegroGraph::Query do
 
   it_should_behave_like RDF_Query
 
+  describe "#relation" do
+    it "adds a relation to the list of patterns" do
+      query = RDF::AllegroGraph::Query.new do |q|
+        q.relation 'ego-group-member', EX.me, 2, FOAF.knows, :person
+      end
+      query.patterns.length.should == 1
+      query.patterns[0].should be_kind_of(RDF::AllegroGraph::Query::Relation)
+    end
+  end
+
   describe "#to_prolog" do
     it "converts the query to AllegroGraph's Lisp-like Prolog syntax" do
       query = RDF::AllegroGraph::Query.new do |q|

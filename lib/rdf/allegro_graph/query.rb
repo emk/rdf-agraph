@@ -4,6 +4,19 @@ module RDF::AllegroGraph
   class Query < RDF::Query
     autoload :Relation, 'rdf/allegro_graph/query/relation'
 
+    # Add a relation to this query.  Relations can only be used in Prolog
+    # queries.
+    #
+    # @param [String] name
+    # @param [Array<Symbol,RDF::Value,value>] arguments
+    #   The arguments to the relation, which may be either variables,
+    #   RDF::Value objects, or Ruby values that we can convert to literals.
+    # @return [void]
+    def relation(name, *arguments)
+      # TODO: Don't abuse duck-typing quite so much.
+      patterns << RDF::AllegroGraph::Query::Relation.new(name, *arguments)
+    end
+
     # Convert this query to AllegoGraph Prolog notation.
     #
     # @param [RDF::AllegroGraph::Repository] repository
