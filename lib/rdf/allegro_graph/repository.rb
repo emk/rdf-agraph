@@ -32,8 +32,8 @@ module RDF::AllegroGraph
     # @option options [Server]  :server  The server hosting the repository.
     # @option options [String]  :id      The name of the repository.
     def initialize(options)
-      @server = options[:server].server
-      @repo = ::AllegroGraph::Repository.new(@server, options[:id])
+      server = options[:server].server
+      @repo = ::AllegroGraph::Repository.new(server, options[:id])
       @blank_nodes = []
       @blank_nodes_to_generate = 8
       @blank_nodes_local_to_server = {}
@@ -110,9 +110,9 @@ module RDF::AllegroGraph
 
     # How many statements are in this repository?
     #def count
-    #  @server.request_http(:get, "#{@repo.path}/statements",
-    #                       :headers => { 'Accept' => 'text/integer' },
-    #                       :expected_status_code => 200).chomp.to_i
+    #  @repo.request_http(:get, path(:statements),
+    #                     :headers => { 'Accept' => 'text/integer' },
+    #                     :expected_status_code => 200).chomp.to_i
     #end
 
 
@@ -259,8 +259,8 @@ module RDF::AllegroGraph
       # Note that specifying deleteDuplicates on repository creation doesn't
       # seem to affect this.
       json = statements_to_json(statements)
-      @server.request_json(:post, "#{@repo.path}/statements", :body => json,
-                           :expected_status_code => 204)
+      @repo.request_json(:post, path(:statements), :body => json,
+                         :expected_status_code => 204)
     end
     protected :insert_statements
 
@@ -281,8 +281,8 @@ module RDF::AllegroGraph
     # @return [void]
     def delete_statements(statements)
       json = statements_to_json(statements)
-      @server.request_json(:post, "#{@repo.path}/statements/delete",
-                           :body => json, :expected_status_code => 204)
+      @repo.request_json(:post, path('statements/delete'),
+                         :body => json, :expected_status_code => 204)
     end
     protected :delete_statements
 
@@ -330,6 +330,11 @@ module RDF::AllegroGraph
 
 
     protected
+
+    # Build a repository-relative path.
+    def path(relative_path)
+      "#{@repo.path}/#{relative_path}"
+    end
 
     # Deserialize an RDF::Value received from the server.
     #
@@ -403,9 +408,9 @@ module RDF::AllegroGraph
 
     # Ask AllegroGraph to generate a series of blank node IDs.
     def generate_blank_nodes(amount)
-      response = @server.request_http(:post, "#{@repo.path}/blankNodes",
-                                      :parameters => { :amount => amount },
-                                      :expected_status_code => 200)
+      response = @repo.request_http(:post, path(:blankNodes),
+                                    :parameters => { :amount => amount },
+                                    :expected_status_code => 200)
       response.chomp.split("\n").map {|i| i.gsub(/^_:/, '') }
     end
 
