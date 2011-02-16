@@ -3,7 +3,7 @@ module RDF::AllegroGraph
   #
   # Note that this class does not interoperate well with the Unix `fork`
   # command if you're using blank nodes.  See README.md for details.
-  class Repository < RDF::Repository
+  class Repository < AbstractRepository
     # This code is based on
     # http://blog.datagraph.org/2010/04/rdf-repository-howto
     #

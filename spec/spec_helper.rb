@@ -20,3 +20,5 @@ REPOSITORY_OPTIONS[:server].repository("rdf_agraph_test", :create => true)
 FOAF = RDF::FOAF
 EX = RDF::Vocabulary.new("http://example.com/")
 
+# Load our shared examples.
+require 'shared_abstract_repository_examples'
