@@ -23,10 +23,7 @@ describe RDF::AllegroGraph::Session do
       @repository.define_generator(:knows,
                                    :object_of => [FOAF.knows, EX.friend])
       query = RDF::AllegroGraph::Query.new do |q|
-        q.relation('ego-group-member', EX.me,
-                   RDF::AllegroGraph::Query::PrologLiteral.new(2),
-                   RDF::AllegroGraph::Query::PrologLiteral.new(:knows),
-                   :person)
+        q.ego_group_member EX.me, 2, :knows, :person
       end
       s = @repository.query(query)
       s.should include_solution(:person => EX.me)
