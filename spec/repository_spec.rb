@@ -53,6 +53,26 @@ describe RDF::AllegroGraph::Repository do
       end
     end
 
+    describe "#sparql_query" do
+      it "matches a SPARQL query" do
+        s = @repository.sparql_query(<<EOD)
+SELECT ?name WHERE {
+  <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }
+EOD
+        s.should include_solution(:name => "Arto Bendiken")
+      end
+    end
+
+    describe "#prolog_query" do
+      it "matches a Prolog query" do
+        s = @repository.prolog_query(<<EOD)
+(select (?name)
+  (q- !<http://ar.to/#self> !<http://xmlns.com/foaf/0.1/name> ?name))
+EOD
+        s.should include_solution(:name => "Arto Bendiken")
+      end
+    end
+
     describe "#query on a Basic Graph Pattern" do
       it "matches all required patterns" do
         query = RDF::Query.new do |q|

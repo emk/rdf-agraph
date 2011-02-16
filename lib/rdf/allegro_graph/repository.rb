@@ -192,6 +192,56 @@ module RDF::AllegroGraph
 
 
     #--------------------------------------------------------------------
+    # @group AllegroGraph-specific query methods
+
+    # Run a raw SPARQL query.
+    #
+    # @overload sparql_query(query) {|solution| ... }
+    #   @yield solution
+    #   @yieldparam [RDF::Query::Solution] solution
+    #   @yieldreturn [void]
+    #   @return [void]
+    #
+    # @overload sparql_query(pattern)
+    #   @return [Enumerable<RDF::Query::Solution>]
+    #
+    # @param [String] query The query to run.
+    # @return [void]
+    def sparql_query(query, &block)
+      raw_query(:sparql, query, &block)
+    end
+
+    # Run a raw Prolog query.
+    #
+    # @overload prolog_query(query) {|solution| ... }
+    #   @yield solution
+    #   @yieldparam [RDF::Query::Solution] solution
+    #   @yieldreturn [void]
+    #   @return [void]
+    #
+    # @overload prolog_query(pattern)
+    #   @return [Enumerable<RDF::Query::Solution>]
+    #
+    # @param [String] query The query to run.
+    # @return [void]
+    def prolog_query(query, &block)
+      raw_query(:prolog, query, &block)
+    end
+
+    # Run a raw query in the specified language.
+    def raw_query(language, query, &block)
+      @repo.query.language = language
+      results = json_to_query_solutions(@repo.query.perform(query))
+      if block_given?
+        results.each {|s| yield s }
+      else
+        results
+      end
+    end
+    protected :raw_query
+
+
+    #--------------------------------------------------------------------
     # @group RDF::Mutable methods
 
     # Insert a single statement into the repository.
@@ -257,6 +307,7 @@ module RDF::AllegroGraph
       @repo.statements.delete
     end
 
+
     #--------------------------------------------------------------------
     # @group Serialization methods
 
@@ -267,7 +318,6 @@ module RDF::AllegroGraph
     #
     # @param [RDF::Value,RDF::Query::Variable] value
     # @return [String]
-    # @private
     def serialize(value)
       case value
       when RDF::Query::Variable then value.to_s
@@ -275,17 +325,17 @@ module RDF::AllegroGraph
       end
     end
 
+
+    protected
+
     # Deserialize an RDF::Value received from the server.
     #
     # @param [String] str
     # @return [RDF::Value]
     # @see #serialize
-    # @private
     def unserialize(str)
       map_from_server(RDF::NTriples::Reader.unserialize(str))
     end
-
-    protected
 
     # Convert a list of statements to a JSON-compatible array.
     def statements_to_json(statements)
