@@ -17,5 +17,13 @@ module RDF::AllegroGraph
     def initialize(agraph_repo)
       super(::AllegroGraph::Session.create(agraph_repo))
     end
+
+    # Define an SNA generator.
+    def define_generator(name, options)
+      generator = SnaGenerator.new(self, name, options)
+      @repo.request_json(:put, path("snaGenerators/#{name}"),
+                         :parameters => generator.to_params,
+                         :expected_status_code => 204)
+    end
   end
 end

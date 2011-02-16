@@ -23,7 +23,7 @@ class RDF::AllegroGraph::Query
       @arguments = arguments.map do |arg|
         case arg
         when Symbol then RDF::Query::Variable.new(arg)
-        when RDF::Value then arg
+        when PrologLiteral, RDF::Value then arg
         else RDF::Literal.new(arg)
         end
       end
