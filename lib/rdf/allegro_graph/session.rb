@@ -24,6 +24,7 @@ module RDF::AllegroGraph
     #
     # @return [void]
     # @see #commit
+    # @see #rollback
     def close
       @repo.request_http(:post, path('session/close'),
                          :expected_status_code => 204)
@@ -32,6 +33,7 @@ module RDF::AllegroGraph
     # Commit the current changes to the main repository.
     #
     # @return [void]
+    # @see #rollback
     def commit
       @repo.commit
     end
@@ -39,6 +41,7 @@ module RDF::AllegroGraph
     # Roll back the changes made since the last commit.
     #
     # @return [void]
+    # @see #commit
     def rollback
       @repo.rollback
     end

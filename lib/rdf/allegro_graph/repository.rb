@@ -22,6 +22,8 @@ module RDF::AllegroGraph
     # @overload session
     #   @return [Session] The newly created session.  It's a good idea to
     #     close this manually; doing so frees up server resources.
+    #   @see Session#commit
+    #   @see Session#rollback
     #   @see Session#close
     #
     # @overload session
