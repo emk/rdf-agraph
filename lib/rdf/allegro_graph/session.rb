@@ -42,6 +42,20 @@ module RDF::AllegroGraph
       Query::PrologLiteral.new(id.to_sym)
     end
 
+    # Commit the current changes to the main repository.
+    #
+    # @return [void]
+    def commit
+      @repo.commit
+    end
+
+    # Roll back the changes made since the last commit.
+    #
+    # @return [void]
+    def rollback
+      @repo.rollback
+    end
+
     protected
 
     def unique_id

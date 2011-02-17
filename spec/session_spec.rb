@@ -8,9 +8,32 @@ describe RDF::AllegroGraph::Session do
 
   after :each do
     @repository.clear
+    @real_repository.clear
   end
 
   it_should_behave_like RDF::AllegroGraph::AbstractRepository
+
+  describe "transaction" do
+    before do
+      @statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])
+      @repository.insert(@statement)
+    end
+
+    it "does not show changes to other sessions before commit is called" do
+      @real_repository.should_not have_statement(@statement)
+    end
+
+    it "shows changes to other sessions after commit is called" do
+      @repository.commit
+      @real_repository.should have_statement(@statement)
+    end
+
+    it "discards changes when rollback is called" do
+      @repository.rollback
+      @real_repository.should_not have_statement(@statement)
+      @repository.should_not have_statement(@statement)
+    end
+  end
 
   describe "Social Network Analysis" do
     it "can calculate the ego group of a resource" do
