@@ -7,10 +7,17 @@ module RDF::AllegroGraph
   # requires both elevated AllegroGraph privileges and dedicated back-end
   # session resources on the server, so plan accordingly.
   #
+  # The Functors module contains a wide variety of functors which may be
+  # used when building a Prolog query.
+  #
   # @see AbstractRepository#build_query
+  # @see Functors
   class Query < RDF::Query
     autoload :PrologLiteral, 'rdf/allegro_graph/query/prolog_literal'
     autoload :Relation, 'rdf/allegro_graph/query/relation'
+
+    # Include our APIs.
+    include Functors::SnaFunctors
 
     # Create a new query.
     # @private
@@ -68,23 +75,6 @@ module RDF::AllegroGraph
     def relation(name, *arguments)
       # TODO: Don't abuse duck-typing quite so much.
       patterns << RDF::AllegroGraph::Query::Relation.new(name, *arguments)
-    end
-
-    # Generate all members of an actor's ego group.
-    #
-    # @param [RDF::Resource] actor The resource at the center of the graph.
-    # @param [Integer] depth The maximum number of links to traverse.
-    # @param [PrologLiteral] generator
-    #   The generator to use when finding links to traverse.
-    # @param [RDF::Query::Variable,RDF::Resource] member
-    #   Either a
-    #
-    # @see Session#generator
-    # @note This function adds a relation to a query.  The relation will
-    #   be executed on the server when the query is run.
-    def ego_group_member(actor, depth, generator, member)
-      relation('ego-group-member', actor, PrologLiteral.new(depth),
-               generator, member)
     end
 
     # Convert this query to AllegoGraph Prolog notation.
