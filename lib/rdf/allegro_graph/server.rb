@@ -21,7 +21,6 @@ module RDF::AllegroGraph
       @server = AllegroGraph::Server.new(options)
       
       unless parsed.path.nil? || parsed.path.empty? || parsed.path == "/"
-        puts parsed.path.inspect
         err = "AllegroGraph URLs with paths not supported: #{url}"
         raise ArgumentError.new(err)
       end
