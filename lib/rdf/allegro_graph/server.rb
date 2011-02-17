@@ -84,12 +84,12 @@ module RDF::AllegroGraph
       result
     end
     alias_method :[], :repository
-  end
 
-  protected
+    protected
 
-  # Generate a path to a resource on the server.
-  def path(relativate_path) # @private
-    "/#{relativate_path}"
+    # Generate a path to a resource on the server.
+    def path(relativate_path) # @private
+      "/#{relativate_path}"
+    end
   end
 end
