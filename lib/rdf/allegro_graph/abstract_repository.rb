@@ -355,13 +355,18 @@ module RDF::AllegroGraph
       "#{@repo.path}/#{relative_path}"
     end
 
-    # Deserialize an RDF::Value received from the server.
+    # Deserialize an RDF::Value received from the server, or an array of such
+    # values when working with Prolog queries.
     #
-    # @param [String] str
+    # @param [String,Array] str_or_array
+    #   A string, or a possibly-nested array of strings.
     # @return [RDF::Value]
     # @see #serialize
-    def unserialize(str)
-      map_from_server(RDF::NTriples::Reader.unserialize(str))
+    def unserialize(str_or_array)
+      case str_or_array
+      when Array then str_or_array.map {|v| unserialize(v) }
+      else map_from_server(RDF::NTriples::Reader.unserialize(str_or_array))
+      end
     end
 
     # Convert a list of statements to a JSON-compatible array.

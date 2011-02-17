@@ -4,18 +4,37 @@ module RDF::AllegroGraph::Functors
   # called when building a query.  Note that these functors merely add a
   # functor expression to a query.  The actual functor will be called on
   # the server.
+  #
+  # @see Session#generator
   module SnaFunctors
     # @private
     PrologLiteral = RDF::AllegroGraph::Query::PrologLiteral
 
+    # Generate an actor's ego group.
+    #
+    # @param [Symbol,RDF::Resource] actor
+    #   Input: The resource at the center of the graph.
+    # @param [Integer] depth
+    #   Input: The maximum number of links to traverse.
+    # @param [PrologLiteral] generator
+    #   Input: The generator to use when finding links to traverse.
+    # @param [Array<RDF::Resource>] group
+    #   Output: Either a variable or resource.
+    def ego_group(actor, depth, generator, group)
+      functor('ego-group', actor, PrologLiteral.new(depth),
+              generator, group)
+    end
+
     # Generate all members of an actor's ego group.
     #
-    # @param [RDF::Resource] actor The resource at the center of the graph.
-    # @param [Integer] depth The maximum number of links to traverse.
+    # @param [Symbol,RDF::Resource] actor
+    #   Input: The resource at the center of the graph.
+    # @param [Integer] depth
+    #   Input: The maximum number of links to traverse.
     # @param [PrologLiteral] generator
-    #   The generator to use when finding links to traverse.
-    # @param [RDF::Query::Variable,RDF::Resource] member
-    #   Either a
+    #   Input: The generator to use when finding links to traverse.
+    # @param [Symbol,RDF::Resource] group
+    #   Input/Output: Either a variable or resource.
     #
     # @see Session#generator
     def ego_group_member(actor, depth, generator, member)
