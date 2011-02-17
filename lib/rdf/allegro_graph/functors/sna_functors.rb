@@ -21,11 +21,12 @@ module RDF::AllegroGraph::Functors
     #   Input: The end node in the path.
     # @param [PrologLiteral] generator
     #   Input: The generator to use when finding links to traverse.
-    # @param [Symbol,Array<RDF::Resource>] to
+    # @param [Symbol] to
     #   Output: A list of nodes in the path.
     # @param [Hash] options
     # @option options [Integer] :max_depth
     #   Input: The maxium search depth.
+    # @return [void]
     def breadth_first_search_paths(from, to, generator, path, options={})
       search_paths('breadth-first-search-paths', from, to, generator, path,
                    options)
@@ -40,11 +41,12 @@ module RDF::AllegroGraph::Functors
     #   Input: The end node in the path.
     # @param [PrologLiteral] generator
     #   Input: The generator to use when finding links to traverse.
-    # @param [Symbol,Array<RDF::Resource>] to
+    # @param [Symbol] to
     #   Output: A list of nodes in the path.
     # @param [Hash] options
     # @option options [Integer] :max_depth
     #   Input: The maxium search depth.
+    # @return [void]
     def depth_first_search_paths(from, to, generator, path, options={})
       search_paths('depth-first-search-paths', from, to, generator, path,
                    options)
@@ -59,11 +61,12 @@ module RDF::AllegroGraph::Functors
     #   Input: The end node in the path.
     # @param [PrologLiteral] generator
     #   Input: The generator to use when finding links to traverse.
-    # @param [Symbol,Array<RDF::Resource>] to
+    # @param [Symbol] to
     #   Output: A list of nodes in the path.
     # @param [Hash] options
     # @option options [Integer] :max_depth
     #   Input: The maxium search depth.
+    # @return [void]
     def bidirectional_search_paths(from, to, generator, path, options={})
       search_paths('bidirectional-search-paths', from, to, generator, path,
                    options)
