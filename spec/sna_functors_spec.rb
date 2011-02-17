@@ -72,6 +72,27 @@ describe RDF::AllegroGraph::Functors::SnaFunctors do
       before { @functor = "depth_first_search_paths" }
       it_should_behave_like "a path functor"
     end
+
+    describe "#neighbor_count" do
+      it "counts the neighboring nodes" do
+        solutions = @repository.build_query do |q|
+          q.neighbor_count(EX.me, @knows, :n)
+        end.run.to_a
+        solutions.length.should == 1
+        solutions.first.n.should == 3
+      end
+    end
+
+    describe "#neighbors" do
+      it "returns the neighboring nodes" do
+        solutions = @repository.build_query do |q|
+          q.neighbors(EX.me, @knows, :neighbor)
+        end.run.to_a
+        solutions.should include_solution(:neighbor =>  EX.bill)
+        solutions.should include_solution(:neighbor =>  EX.sally)
+        solutions.should include_solution(:neighbor =>  EX.sam)
+      end
+    end
   end
 
   context "with a simple FOAF graph" do

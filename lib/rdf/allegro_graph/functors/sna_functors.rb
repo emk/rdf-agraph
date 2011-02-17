@@ -85,6 +85,34 @@ module RDF::AllegroGraph::Functors
 
     # @group Nearby Nodes
 
+    # Count the neighbors of the actor.
+    #
+    # @param [Symbol,RDF::Resource] actor
+    #   Input: The node whose neighbors we want to find.
+    # @param [PrologLiteral] generator
+    #   Input: The generator to use when finding links to traverse.
+    # @param [Symbol] count
+    #   Output: The number of neighbors of the actor.
+    # @return [void]
+    def neighbor_count(actor, generator, count)
+      functor('nodal-degree', actor, generator, count)
+    end
+    alias_method :nodal_degree, :neighbor_count
+
+    # Find all neighbors of the actor.
+    #
+    # @param [Symbol,RDF::Resource] actor
+    #   Input: The node whose neighbors we want to find.
+    # @param [PrologLiteral] generator
+    #   Input: The generator to use when finding links to traverse.
+    # @param [Symbol] neighbor
+    #   Output: A neighbor of the actor.
+    # @return [void]
+    def neighbors(actor, generator, neighbor)
+      functor('nodal-neighbors', actor, generator, neighbor)
+    end
+    alias_method :nodal_neighbors, :neighbors
+
     # Generate an actor's ego group.
     #
     # @param [Symbol,RDF::Resource] actor
