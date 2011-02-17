@@ -14,6 +14,25 @@ describe RDF::AllegroGraph::Query do
 
   it_should_behave_like RDF_Query
 
+  describe "#run" do
+    before do
+      @repository.insert([EX.me, RDF.type, FOAF.Person])
+      @query = RDF::AllegroGraph::Query.new(@repository) do |q|
+        q.pattern [:person, RDF.type, FOAF.Person]
+      end
+    end
+
+    it "runs the query against the repository" do
+      @query.run.to_a.should include_solution(:person => EX.me)
+    end
+
+    it "accepts a block argument" do
+      solutions = []
+      @query.run {|s| solutions << s }
+      solutions.should include_solution(:person => EX.me)
+    end
+  end
+
   describe "#relation" do
     it "adds a relation to the list of patterns" do
       query = RDF::AllegroGraph::Query.new(@repository) do |q|

@@ -19,6 +19,42 @@ module RDF::AllegroGraph
       super(&block)
     end
 
+    # Run this query against the associated repository.  This method exists
+    # solely to make the following API pleasant to use:
+    #
+    #     repo.build_query do |q|
+    #       q.pattern [:s, :p, :o]
+    #     end.run do |solution|
+    #       puts solution
+    #     end
+    #
+    # Note that this function returns an Enumerator, not an array, because
+    # RDF.rb is committed to streaming results gradually.  If you want to
+    # treat the result as an array, call 'to_a' explicitly:
+    #
+    #     solutions = repo.build_query do |q|
+    #       q.pattern [:s, :p, :o]
+    #     end.run.to_a
+    #
+    # If you forget to do this, you will run a new query each time you
+    # attempt to iterate over the solutions!
+    #
+    # @overload run
+    #   @return [Enumerator<RDF::Query::Solution>]
+    #
+    # @overload run
+    #   @yield solution
+    #   @yieldparam [RDF::Query::Solution]
+    #   @yieldreturn [void]
+    #   @return [void]
+    #
+    # @see Repository#query
+    # @note This function returns a single-use Enumerator!  See below for
+    #   details.
+    def run(&block)
+      @repository.query(self, &block)
+    end
+
     # Add a relation to this query.  Relations can only be used in Prolog
     # queries.
     #
