@@ -16,7 +16,7 @@ describe RDF::AllegroGraph::Query do
 
   describe "#relation" do
     it "adds a relation to the list of patterns" do
-      query = RDF::AllegroGraph::Query.new do |q|
+      query = RDF::AllegroGraph::Query.new(@repository) do |q|
         q.relation 'ego-group-member', EX.me, 2, FOAF.knows, :person
       end
       query.patterns.length.should == 1
@@ -26,7 +26,7 @@ describe RDF::AllegroGraph::Query do
 
   describe "#to_prolog" do
     it "converts the query to AllegroGraph's Lisp-like Prolog syntax" do
-      query = RDF::AllegroGraph::Query.new do |q|
+      query = RDF::AllegroGraph::Query.new(@repository) do |q|
         q.pattern [:person, RDF.type, FOAF.Person]
         q.pattern [:person, FOAF.name, :name]
         q.pattern [:person, FOAF.mbox, "mailto:jsmith@example.com"]
@@ -40,7 +40,7 @@ EOD
     end
 
     it "converts relations to function calls" do
-      query = RDF::AllegroGraph::Query.new do |q|
+      query = RDF::AllegroGraph::Query.new(@repository) do |q|
         q.relation 'ego-group-member', EX.me, 2, FOAF.knows, :person
       end
       query.to_prolog(@repository).should == <<EOD.chomp

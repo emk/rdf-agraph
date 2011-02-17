@@ -12,6 +12,13 @@ module RDF::AllegroGraph
     autoload :PrologLiteral, 'rdf/allegro_graph/query/prolog_literal'
     autoload :Relation, 'rdf/allegro_graph/query/relation'
 
+    # Create a new query.
+    # @private
+    def initialize(repository, &block)
+      @repository = repository
+      super(&block)
+    end
+
     # Add a relation to this query.  Relations can only be used in Prolog
     # queries.
     #

@@ -236,7 +236,7 @@ module RDF::AllegroGraph
     # @see Query
     # @see RDF::Query
     def build_query(&block)
-      Query.new(&block)
+      Query.new(self, &block)
     end
 
 
