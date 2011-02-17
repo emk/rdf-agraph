@@ -1,5 +1,25 @@
 require 'spec_helper'
 
+shared_examples_for "a path functor" do
+  it "returns one or more paths between the specified nodes" do
+    slns = @repository.build_query do |q|
+      q.send(@functor, EX.me, EX.rachel, @knows, :path)
+    end.run.to_a
+    slns.length.should >= 1
+    slns.each do |s|
+      s.path.first.should == EX.me
+      s.path.last.should == EX.rachel
+    end
+  end
+
+  it "honors :max_length" do
+    slns = @repository.build_query do |q|
+      q.send(@functor, EX.me, EX.rachel, @knows, :path, :max_depth => 1)
+    end.run.to_a
+    slns.should be_empty
+  end
+end
+
 describe RDF::AllegroGraph::Functors::SnaFunctors do
   before :each do
     @real_repository = RDF::AllegroGraph::Repository.new(REPOSITORY_OPTIONS)
@@ -9,6 +29,49 @@ describe RDF::AllegroGraph::Functors::SnaFunctors do
   after :each do
     @repository.close unless @repository.nil? # We might have closed it.
     @real_repository.clear
+  end
+
+  context "with a graph containing multiple paths" do
+    before do
+      @repository.insert(
+        # Path 1: me -> bill -> rachel
+        [EX.me, FOAF.knows, EX.bill],
+        [EX.bill, FOAF.knows, EX.rachel],
+        # Path 2: me -> sally -> rachel
+        [EX.me, FOAF.knows, EX.sally],
+        [EX.sally, FOAF.knows, EX.rachel],
+        # Path 3: me -> sam -> ben -> rachel
+        [EX.me, FOAF.knows, EX.sam],
+        [EX.sam, FOAF.knows, EX.ben],
+        [EX.ben, FOAF.knows, EX.rachel]
+      )
+      @knows = @repository.generator(:object_of => FOAF.knows)
+    end
+
+    describe "#breadth_first_search_paths" do
+      before { @functor = "breadth_first_search_paths" }
+      it_should_behave_like "a path functor"
+        
+      it "returns the shortest paths between the specified nodes" do
+        slns = @repository.build_query do |q|
+          q.breadth_first_search_paths(EX.me, EX.rachel, @knows, :path)
+        end.run.to_a
+        slns.should include_solution(:path => [EX.me, EX.bill, EX.rachel])
+        slns.should include_solution(:path => [EX.me, EX.sally, EX.rachel])
+        slns.should_not include_solution(:path => [EX.me, EX.sam, EX.ben,
+                                                   EX.rachel])
+      end
+    end
+
+    describe "#depth_first_search_paths" do
+      before { @functor = "depth_first_search_paths" }
+      it_should_behave_like "a path functor"
+    end
+
+    describe "#bidirectional_search_paths" do
+      before { @functor = "depth_first_search_paths" }
+      it_should_behave_like "a path functor"
+    end
   end
 
   context "with a simple FOAF graph" do
