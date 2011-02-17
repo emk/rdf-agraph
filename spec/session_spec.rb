@@ -21,6 +21,14 @@ describe RDF::AllegroGraph::Session do
       end.should raise_error
       @repository = nil
     end
+
+    it "does not commit outstanding transactions" do
+      @statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])
+      @repository.insert(@statement)
+      @repository.close
+      @repository = nil
+      @real_repository.should_not have_statement(@statement)      
+    end
   end
 
   describe "transaction" do

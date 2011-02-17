@@ -20,11 +20,27 @@ module RDF::AllegroGraph
     end
 
     # Explicitly close the current session and release all server resources.
+    # This function does _not_ commit any outstanding transactions.
     #
     # @return [void]
+    # @see #commit
     def close
       @repo.request_http(:post, path('session/close'),
                          :expected_status_code => 204)
+    end
+
+    # Commit the current changes to the main repository.
+    #
+    # @return [void]
+    def commit
+      @repo.commit
+    end
+
+    # Roll back the changes made since the last commit.
+    #
+    # @return [void]
+    def rollback
+      @repo.rollback
     end
 
     # Define an SNA generator.
@@ -48,20 +64,6 @@ module RDF::AllegroGraph
                          :parameters => generator.to_params,
                          :expected_status_code => 204)
       Query::PrologLiteral.new(id.to_sym)
-    end
-
-    # Commit the current changes to the main repository.
-    #
-    # @return [void]
-    def commit
-      @repo.commit
-    end
-
-    # Roll back the changes made since the last commit.
-    #
-    # @return [void]
-    def rollback
-      @repo.rollback
     end
 
     protected
