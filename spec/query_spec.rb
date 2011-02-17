@@ -33,13 +33,14 @@ describe RDF::AllegroGraph::Query do
     end
   end
 
-  describe "#relation" do
-    it "adds a relation to the list of patterns" do
+  describe "#functor" do
+    it "adds a functor expression to the list of patterns" do
       query = RDF::AllegroGraph::Query.new(@repository) do |q|
-        q.relation 'ego-group-member', EX.me, 2, FOAF.knows, :person
+        q.functor 'ego-group-member', EX.me, 2, FOAF.knows, :person
       end
       query.patterns.length.should == 1
-      query.patterns[0].should be_kind_of(RDF::AllegroGraph::Query::Relation)
+      query.patterns[0].
+        should be_kind_of(RDF::AllegroGraph::Query::FunctorExpression)
     end
   end
 
@@ -58,9 +59,9 @@ describe RDF::AllegroGraph::Query do
 EOD
     end
 
-    it "converts relations to function calls" do
+    it "converts functors to function calls" do
       query = RDF::AllegroGraph::Query.new(@repository) do |q|
-        q.relation 'ego-group-member', EX.me, 2, FOAF.knows, :person
+        q.functor 'ego-group-member', EX.me, 2, FOAF.knows, :person
       end
       query.to_prolog(@repository).should == <<EOD.chomp
 (select (?person)

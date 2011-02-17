@@ -14,7 +14,7 @@ module RDF::AllegroGraph
   # @see Functors
   class Query < RDF::Query
     autoload :PrologLiteral, 'rdf/allegro_graph/query/prolog_literal'
-    autoload :Relation, 'rdf/allegro_graph/query/relation'
+    autoload :FunctorExpression, 'rdf/allegro_graph/query/functor_expression'
 
     # Include our APIs.
     include Functors::SnaFunctors
@@ -64,17 +64,18 @@ module RDF::AllegroGraph
       @repository.query(self, &block)
     end
 
-    # Add a relation to this query.  Relations can only be used in Prolog
-    # queries.
+    # Add a functor expression to this query.  Functors can only be used
+    # in Prolog queries.
     #
     # @param [String] name
     # @param [Array<Symbol,RDF::Value,value>] arguments
-    #   The arguments to the relation, which may be either variables,
+    #   The arguments to the functor, which may be either variables,
     #   RDF::Value objects, or Ruby values that we can convert to literals.
     # @return [void]
-    def relation(name, *arguments)
+    def functor(name, *arguments)
       # TODO: Don't abuse duck-typing quite so much.
-      patterns << RDF::AllegroGraph::Query::Relation.new(name, *arguments)
+      patterns <<
+        RDF::AllegroGraph::Query::FunctorExpression.new(name, *arguments)
     end
 
     # Convert this query to AllegoGraph Prolog notation.
@@ -84,31 +85,31 @@ module RDF::AllegroGraph
     # @private
     def to_prolog(repository)
       variables = []
-      relations = []
+      functors = []
       patterns.each do |p|
         # Extract any new variables we see in the query.
         p.variables.each {|_,v| variables << v unless variables.include?(v) }
-        relations << convert_to_relation(p).to_prolog(repository)
+        functors << convert_to_functor(p).to_prolog(repository)
       end
-      "(select (#{variables.join(" ")})\n  #{relations.join("\n  ")})"
+      "(select (#{variables.join(" ")})\n  #{functors.join("\n  ")})"
     end
 
     protected
 
-    # Convert patterns to relations (and leave relations unchanged).
+    # Convert patterns to functors (and leave functors unchanged).
     #
-    # @param [RDF::Query::Pattern,Relation] pattern_or_relation
-    # @return [Relation]
+    # @param [RDF::Query::Pattern,FunctorExpression] pattern_or_functor
+    # @return [FunctorExpression]
     # @private
-    def convert_to_relation(pattern_or_relation)
-      case pattern_or_relation
-      when Relation then pattern_or_relation
+    def convert_to_functor(pattern_or_functor)
+      case pattern_or_functor
+      when FunctorExpression then pattern_or_functor
       else
-      p = pattern_or_relation
+      p = pattern_or_functor
         if p.optional? || p.context
-          raise ArgumentError.new("Can't translate #{p} to Prolog relation")
+          raise ArgumentError.new("Can't translate #{p} to Prolog functor")
         end
-        Relation.new('q-', p.subject, p.predicate, p.object)
+        FunctorExpression.new('q-', p.subject, p.predicate, p.object)
       end
     end
   end

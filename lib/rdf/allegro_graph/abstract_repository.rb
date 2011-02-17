@@ -237,7 +237,7 @@ module RDF::AllegroGraph
     #
     # @yield query
     # @yieldparam [Query] The query to build.  Use the Query API to add
-    #   patterns and relations.
+    #   patterns and functors.
     # @yieldreturn [void]
     # @return [Query]
     #

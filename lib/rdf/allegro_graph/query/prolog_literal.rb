@@ -1,7 +1,7 @@
 class RDF::AllegroGraph::Query
-  # A literal value which can be passed as an argument to a Prolog relation.
+  # A literal value which can be passed as an argument to a Prolog functor.
   #
-  # @see @Relation
+  # @see @FunctorExpression
   class PrologLiteral
     # Constract a new Prolog literal.
     #

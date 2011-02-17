@@ -1,23 +1,23 @@
 class RDF::AllegroGraph::Query
 
-  # A relational expression in a Prolog query (other than an ordinary
+  # A functor expression in a Prolog query (other than an ordinary
   # pattern).
   #
   # @see RDF::Query::Pattern
-  class Relation
-    # The name of this relation.
+  # @see RDF::AllegroGraph::Functors
+  class FunctorExpression
+    # The name of this functor.
     attr_reader :name
 
-    # The arguments passed to this relation.
+    # The arguments passed to this functor.
     attr_reader :arguments
 
-    # Construct a new relation.
+    # Construct a new functor.
     #
     # @param [String] name
     # @param [Array<Symbol,RDF::Value,value>] arguments
-    #   The arguments to the relation, which may be either variables,
+    #   The arguments to the functor, which may be either variables,
     #   RDF::Value objects, or Ruby values that we can convert to literals.
-    # @return [Relation]
     def initialize(name, *arguments)
       @name = name
       @arguments = arguments.map do |arg|
@@ -29,7 +29,7 @@ class RDF::AllegroGraph::Query
       end
     end
 
-    # Return a hash table of all variables used in this relation.  This
+    # Return a hash table of all variables used in this functor.  This
     # is intended to be duck-type compatible with the same method in
     # RDF::Query::Pattern.
     #
@@ -43,7 +43,7 @@ class RDF::AllegroGraph::Query
       result
     end
 
-    # Convert this relation to a Prolog Lisp expression.
+    # Convert this functor to a Prolog Lisp expression.
     #
     # @param [RDF::AllegroGraph::Repository] repository
     # @return [String]

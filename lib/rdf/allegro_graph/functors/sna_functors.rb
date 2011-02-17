@@ -1,7 +1,9 @@
 module RDF::AllegroGraph::Functors
   
-  # This module contains AllegroGraph functor definitions that may be called
-  # when building a query.
+  # This module contains AllegroGraph functor definitions that may be
+  # called when building a query.  Note that these functors merely add a
+  # functor expression to a query.  The actual functor will be called on
+  # the server.
   module SnaFunctors
     # @private
     PrologLiteral = RDF::AllegroGraph::Query::PrologLiteral
@@ -16,11 +18,9 @@ module RDF::AllegroGraph::Functors
     #   Either a
     #
     # @see Session#generator
-    # @note This function adds a relation to a query.  The relation will
-    #   be executed on the server when the query is run.
     def ego_group_member(actor, depth, generator, member)
-      relation('ego-group-member', actor, PrologLiteral.new(depth),
-               generator, member)
+      functor('ego-group-member', actor, PrologLiteral.new(depth),
+              generator, member)
     end    
   end
 end
