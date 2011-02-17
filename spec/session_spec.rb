@@ -7,11 +7,21 @@ describe RDF::AllegroGraph::Session do
   end
 
   after :each do
-    @repository.clear
+    @repository.close unless @repository.nil? # We might have closed it.
     @real_repository.clear
   end
 
   it_should_behave_like RDF::AllegroGraph::AbstractRepository
+
+  describe "#close" do
+    it "destroys the underlying session" do
+      @repository.close
+      lambda do
+        @repository.close
+      end.should raise_error
+      @repository = nil
+    end
+  end
 
   describe "transaction" do
     before do

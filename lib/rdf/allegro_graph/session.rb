@@ -19,6 +19,14 @@ module RDF::AllegroGraph
       @last_unique_id = 0
     end
 
+    # Explicitly close the current session and release all server resources.
+    #
+    # @return [void]
+    def close
+      @repo.request_http(:post, path('session/close'),
+                         :expected_status_code => 204)
+    end
+
     # Define an SNA generator.
     #
     # @param [Hash] options
