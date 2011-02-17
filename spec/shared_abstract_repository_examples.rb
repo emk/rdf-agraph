@@ -48,6 +48,7 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
 SELECT ?name WHERE {
   <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }
 EOD
+        s.should be_kind_of(Enumberable::Enumerator)
         s.should include_solution(:name => "Arto Bendiken")
       end
     end
@@ -58,6 +59,7 @@ EOD
 (select (?name)
   (q- !<http://ar.to/#self> !<http://xmlns.com/foaf/0.1/name> ?name))
 EOD
+        s.should be_kind_of(Enumerable::Enumerator)
         s.should include_solution(:name => "Arto Bendiken")
       end
     end
@@ -79,7 +81,7 @@ EOD
           q.pattern [:person, FOAF.name, :name]
           q.pattern [:person, FOAF.mbox, :email]
         end
-        s = @repository.query(query)
+        s = @repository.query(query).to_a
         s.should include_solution(:person => "http://ar.to/#self",
                                   :name => "Arto Bendiken",
                                   :email => "mailto:arto.bendiken@gmail.com")
@@ -96,7 +98,7 @@ EOD
           q.pattern [:person, RDF.type, FOAF.Person]
           q.pattern [:person, FOAF.made, :made], :optional => true
         end
-        s = @repository.query(query)
+        s = @repository.query(query).to_a
         s.should include_solution(:person => "http://ar.to/#self",
                                   :made => "http://rubygems.org/gems/rdf")
         s.should include_solution(:person => "http://bhuga.net/#ben")
@@ -108,7 +110,7 @@ EOD
           q.pattern [:person, RDF.type, FOAF.Person]
           q.pattern [:person, FOAF.name, "Arto Bendiken"]
         end
-        s = @repository.query(query)
+        s = @repository.query(query).to_a
         s.should include_solution(:person => "http://ar.to/#self")
       end
 
@@ -122,7 +124,7 @@ EOD
       #
       #  it "matches statements with and without a context" do
       #    query = RDF::Query.new {|q| q.pattern [:s, EX.p, EX.o] }
-      #    s = @repository.query(query)
+      #    s = @repository.query(query).to_a
       #    s.should include_solution(:s => EX.s1)
       #    s.should include_solution(:s => EX.s2)
       #  end

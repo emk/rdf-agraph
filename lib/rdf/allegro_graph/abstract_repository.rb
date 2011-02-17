@@ -188,10 +188,14 @@ module RDF::AllegroGraph
     #   @return [void]
     #
     # @overload sparql_query(pattern)
-    #   @return [Enumerable<RDF::Query::Solution>]
+    #   @return [Enumerable::Enumerator<RDF::Query::Solution>]
     #
     # @param [String] query The query to run.
     # @return [void]
+    # @note This function returns a single-use Enumerator!  If you want to
+    #   to treat the results as an array, call `to_a` on it, or you will
+    #   re-run the query against the server repeatedly.  This curious
+    #   decision is made for consistency with RDF.rb.
     def sparql_query(query, &block)
       raw_query(:sparql, query, &block)
     end
@@ -205,10 +209,14 @@ module RDF::AllegroGraph
     #   @return [void]
     #
     # @overload prolog_query(pattern)
-    #   @return [Enumerable<RDF::Query::Solution>]
+    #   @return [Enumerable::Enumerator<RDF::Query::Solution>]
     #
     # @param [String] query The query to run.
     # @return [void]
+    # @note This function returns a single-use Enumerator!  If you want to
+    #   to treat the results as an array, call `to_a` on it, or you will
+    #   re-run the query against the server repeatedly.  This curious
+    #   decision is made for consistency with RDF.rb.
     def prolog_query(query, &block)
       raw_query(:prolog, query, &block)
     end
@@ -220,7 +228,7 @@ module RDF::AllegroGraph
       if block_given?
         results.each {|s| yield s }
       else
-        results
+        enum_for(:raw_query, language, query)
       end
     end
     protected :raw_query

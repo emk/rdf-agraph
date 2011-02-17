@@ -60,14 +60,14 @@ describe RDF::AllegroGraph::Session do
       )
 
       knows = @repository.generator(:object_of => [FOAF.knows, EX.friend])
-      query = @repository.build_query do |q|
+      solutions = @repository.build_query do |q|
         q.ego_group_member EX.me, 2, knows, :person
-      end
-      s = @repository.query(query)
-      s.should include_solution(:person => EX.me)
-      s.should include_solution(:person => EX.bill)
-      s.should include_solution(:person => EX.rachel)
-      s.should_not include_solution(:person => EX.gary)
+      end.run.to_a
+
+      solutions.should include_solution(:person => EX.me)
+      solutions.should include_solution(:person => EX.bill)
+      solutions.should include_solution(:person => EX.rachel)
+      solutions.should_not include_solution(:person => EX.gary)
     end
   end
 end

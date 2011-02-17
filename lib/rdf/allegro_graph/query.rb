@@ -40,7 +40,7 @@ module RDF::AllegroGraph
     # attempt to iterate over the solutions!
     #
     # @overload run
-    #   @return [Enumerator<RDF::Query::Solution>]
+    #   @return [Enumerable::Enumerator<RDF::Query::Solution>]
     #
     # @overload run
     #   @yield solution
@@ -49,8 +49,10 @@ module RDF::AllegroGraph
     #   @return [void]
     #
     # @see Repository#query
-    # @note This function returns a single-use Enumerator!  See below for
-    #   details.
+    # @note This function returns a single-use Enumerator!  If you want to
+    #   to treat the results as an array, call `to_a` on it, or you will
+    #   re-run the query against the server repeatedly.  This curious
+    #   decision is made for consistency with RDF.rb.
     def run(&block)
       @repository.query(self, &block)
     end
