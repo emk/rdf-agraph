@@ -10,23 +10,35 @@ module RDF::AllegroGraph
     #   @param [Hash{Symbol => Object}] options
     #   @option options [Server]  :server  The server hosting the repository.
     #   @option options [String]  :id      The name of the repository.
+    #   @option options [Boolean] :create  Create the repository if necessary?
     #
-    # @overload initialize(url)
+    # @overload initialize(url, options)
     #   @param [String] url                The URL of the repository.
-    def initialize(options)
-      case options
+    #   @param [Hash{Symbol => Object}] options
+    #   @option options [Boolean] :create  Create the repository if necessary?
+    def initialize(url_or_options, options={})
+      case url_or_options
       when String
         # TODO: Clean this up.
-        url = URI.parse(options)
+        url = URI.parse(url_or_options)
         path = Pathname.new(url.path)
         url.path = path.parent.parent.to_s
         server = Server.new(url.to_s).server
         id = path.basename
       else
-        server = options[:server].server
-        id = options[:id]
+        server = url_or_options[:server].server
+        id = url_or_options[:id]
+        options = url_or_options
       end
       super(::AllegroGraph::Repository.new(server, id))
+      @repo.create_if_missing! if options[:create]
+    end
+
+    # Delete this repository if it exists.
+    #
+    # @return [void]
+    def delete!
+      @repo.delete!
     end
 
     # Create a new, persistent AllegroGraph session.  If called without a

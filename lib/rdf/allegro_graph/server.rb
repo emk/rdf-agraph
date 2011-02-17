@@ -77,8 +77,7 @@ module RDF::AllegroGraph
     def repository(id, options={})
       result = repositories[id]
       if result.nil? && options[:create]
-        ::AllegroGraph::Repository.new(self, id).create!
-        result = Repository.new(:server => self, :id => id)
+        result = Repository.new(:server => self, :id => id, :create => true)
       end
       result
     end

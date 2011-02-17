@@ -22,6 +22,17 @@ describe RDF::AllegroGraph::Repository do
     end
   end
 
+  describe "repository creation and deletion" do
+    it "is performed using #new with :create and delete!" do
+      server = REPOSITORY_OPTIONS[:server]
+      url = "http://test:test@localhost:10035/repositories/rdf_agraph_test_2"
+      @repository2 = RDF::AllegroGraph::Repository.new(url, :create => true)
+      server.should have_repository('rdf_agraph_test_2')
+      @repository2.delete!
+      server.should_not have_repository('rdf_agraph_test_2')
+    end    
+  end
+
   describe "#session" do
     context "without a block" do
       it "creates and returns a session" do
