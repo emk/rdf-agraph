@@ -14,6 +14,8 @@ class RDF::AllegroGraph::Query
     # security here: Our callers might try to pass in untrustworthy values
     # without thinking through the consequences, and we want to limit the
     # damage.  We assume that all symbols are trustworthy.
+    #
+    # @return [String]
     def to_s
       case @value
       when Symbol, Numeric

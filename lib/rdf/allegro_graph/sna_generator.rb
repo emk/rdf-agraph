@@ -1,5 +1,8 @@
 module RDF::AllegroGraph
-  class SnaGenerator # @private
+  # Internal helper class for defining SNA generators.
+  #
+  # @private
+  class SnaGenerator 
     attr_reader :options
 
     def initialize(repository, options)

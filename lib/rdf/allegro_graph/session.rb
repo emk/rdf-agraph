@@ -20,6 +20,19 @@ module RDF::AllegroGraph
     end
 
     # Define an SNA generator.
+    #
+    # @param [Hash] options
+    # @option options [RDF::Resource,Array<RDF::Resource>] :object_of
+    #   Follow links defined by specified predicates.
+    # @option options [RDF::Resource,Array<RDF::Resource>] :subject_of
+    #   Follow links defined by specified predicates, but from the object
+    #   to the subject.
+    # @option options [RDF::Resource,Array<RDF::Resource>] :undirected
+    #   Follow links defined by specified predicates in both directions.
+    # @return [Query::PrologLiteral]
+    #   A value which may be used in Prolog queries.
+    #
+    # @see Query#ego_group_member
     def generator(options)
       id = unique_id
       generator = SnaGenerator.new(self, options)
