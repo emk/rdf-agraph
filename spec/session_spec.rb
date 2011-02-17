@@ -16,9 +16,7 @@ describe RDF::AllegroGraph::Session do
   describe "#close" do
     it "destroys the underlying session" do
       @repository.close
-      lambda do
-        @repository.close
-      end.should raise_error
+      lambda { @repository.close }.should raise_error
       @repository = nil
     end
 
