@@ -6,6 +6,8 @@ module RDF::AllegroGraph
   # used when running Prolog queries against a Session object.  This
   # requires both elevated AllegroGraph privileges and dedicated back-end
   # session resources on the server, so plan accordingly.
+  #
+  # @see AbstractRepository#build_query
   class Query < RDF::Query
     autoload :PrologLiteral, 'rdf/allegro_graph/query/prolog_literal'
     autoload :Relation, 'rdf/allegro_graph/query/relation'

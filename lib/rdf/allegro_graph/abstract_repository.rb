@@ -225,6 +225,20 @@ module RDF::AllegroGraph
     end
     protected :raw_query
 
+    # Construct an AllegroGraph-specific query.
+    #
+    # @yield query
+    # @yieldparam [Query] The query to build.  Use the Query API to add
+    #   patterns and relations.
+    # @yieldreturn [void]
+    # @return [Query]
+    #
+    # @see Query
+    # @see RDF::Query
+    def build_query(&block)
+      Query.new(&block)
+    end
+
 
     #--------------------------------------------------------------------
     # @group RDF::Mutable methods

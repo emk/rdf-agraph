@@ -62,6 +62,16 @@ EOD
       end
     end
 
+    describe "#build_query" do
+      it "creates a new query" do
+        query = @repository.build_query do |q|
+          q.pattern [:person, RDF.type, FOAF.Person]
+        end
+        query.should be_kind_of(RDF::AllegroGraph::Query)
+        query.patterns.length.should == 1
+      end
+    end
+
     describe "#query on a Basic Graph Pattern" do
       it "matches all required patterns" do
         query = RDF::Query.new do |q|
@@ -94,7 +104,7 @@ EOD
       end
 
       it "runs AllegroGraph-specific queries" do
-        query = RDF::AllegroGraph::Query.new do |q|
+        query = @repository.build_query do |q|
           q.pattern [:person, RDF.type, FOAF.Person]
           q.pattern [:person, FOAF.name, "Arto Bendiken"]
         end

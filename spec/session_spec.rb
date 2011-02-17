@@ -60,7 +60,7 @@ describe RDF::AllegroGraph::Session do
       )
 
       knows = @repository.generator(:object_of => [FOAF.knows, EX.friend])
-      query = RDF::AllegroGraph::Query.new do |q|
+      query = @repository.build_query do |q|
         q.ego_group_member EX.me, 2, knows, :person
       end
       s = @repository.query(query)
