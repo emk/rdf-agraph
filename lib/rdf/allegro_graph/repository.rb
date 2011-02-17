@@ -6,12 +6,27 @@ module RDF::AllegroGraph
   class Repository < AbstractRepository
     # Create a new AllegroGraph repository adapter.
     #
-    # @param [Hash{Symbol => Object}] options
-    # @option options [Server]  :server  The server hosting the repository.
-    # @option options [String]  :id      The name of the repository.
+    # @overload initialize(options)
+    #   @param [Hash{Symbol => Object}] options
+    #   @option options [Server]  :server  The server hosting the repository.
+    #   @option options [String]  :id      The name of the repository.
+    #
+    # @overload initialize(url)
+    #   @param [String] url                The URL of the repository.
     def initialize(options)
-      server = options[:server].server
-      super(::AllegroGraph::Repository.new(server, options[:id]))
+      case options
+      when String
+        # TODO: Clean this up.
+        url = URI.parse(options)
+        path = Pathname.new(url.path)
+        url.path = path.parent.parent.to_s
+        server = Server.new(url.to_s).server
+        id = path.basename
+      else
+        server = options[:server].server
+        id = options[:id]
+      end
+      super(::AllegroGraph::Repository.new(server, id))
     end
 
     # Create a new, persistent AllegroGraph session.  If called without a

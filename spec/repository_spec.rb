@@ -11,7 +11,18 @@ describe RDF::AllegroGraph::Repository do
 
   it_should_behave_like RDF::AllegroGraph::AbstractRepository
 
-  describe ".session" do
+  describe ".new" do
+    it "allows the user to pass a repository URL" do
+      url = "http://test:test@localhost:10035/repositories/rdf_agraph_test"
+      @repository2 = RDF::AllegroGraph::Repository.new(url)
+
+      statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])
+      @repository.insert(statement)
+      @repository2.should have_statement(statement)
+    end
+  end
+
+  describe "#session" do
     context "without a block" do
       it "creates and returns a session" do
         session = @repository.session
