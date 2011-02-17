@@ -48,7 +48,7 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
 SELECT ?name WHERE {
   <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }
 EOD
-        s.should be_kind_of(Enumberable::Enumerator)
+        s.should be_kind_of(Enumerable::Enumerator)
         s.should include_solution(:name => "Arto Bendiken")
       end
     end
