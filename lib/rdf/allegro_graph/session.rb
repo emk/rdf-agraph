@@ -16,14 +16,23 @@ module RDF::AllegroGraph
     # @private
     def initialize(agraph_repo)
       super(::AllegroGraph::Session.create(agraph_repo))
+      @last_unique_id = 0
     end
 
     # Define an SNA generator.
-    def define_generator(name, options)
-      generator = SnaGenerator.new(self, name, options)
-      @repo.request_json(:put, path("snaGenerators/#{name}"),
+    def generator(options)
+      id = unique_id
+      generator = SnaGenerator.new(self, options)
+      @repo.request_json(:put, path("snaGenerators/#{id}"),
                          :parameters => generator.to_params,
                          :expected_status_code => 204)
+      Query::PrologLiteral.new(id.to_sym)
+    end
+
+    protected
+
+    def unique_id
+      "id#{@last_unique_id += 1}"
     end
   end
 end

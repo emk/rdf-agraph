@@ -8,8 +8,7 @@ describe RDF::AllegroGraph::SnaGenerator do
       :subject_of => [EX.knows1, EX.knows2],
       :undirected => EX.knows3
     }
-    generator = RDF::AllegroGraph::SnaGenerator.new(@repo, :knows, options)
-    generator.name.should == :knows
+    generator = RDF::AllegroGraph::SnaGenerator.new(@repo, options)
     generator.to_params.should == {
       :objectOf => @repo.serialize(FOAF.knows),
       :subjectOf => [@repo.serialize(EX.knows1),

@@ -20,7 +20,7 @@ module RDF::AllegroGraph
 
     def ego_group_member(actor, depth, generator, member)
       relation('ego-group-member', actor, PrologLiteral.new(depth),
-               PrologLiteral.new(generator), member)
+               generator, member)
     end
 
     # Convert this query to AllegoGraph Prolog notation.

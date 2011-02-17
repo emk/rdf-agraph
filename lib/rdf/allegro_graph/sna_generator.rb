@@ -1,11 +1,9 @@
 module RDF::AllegroGraph
-  class SnaGenerator
-    attr_reader :name
+  class SnaGenerator # @private
     attr_reader :options
 
-    def initialize(repository, name, options)
+    def initialize(repository, options)
       @repository = repository
-      @name = name
       @options = options
     end
 
