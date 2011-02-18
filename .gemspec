@@ -4,11 +4,11 @@ Gem::Specification.new do |gem|
   gem.date = File.mtime('VERSION').strftime('%Y-%m-%d')
 
   gem.name = 'rdf-agraph'
-  #gem.homepage = 
+  gem.homepage = "http://rdf-agraph.rubyforge.org/"
   gem.license = 'Public Domain' if gem.respond_to?(:license)
   gem.summary = "AllegroGraph adapter for RDF.rb"
   gem.description = "An AllegroGraph adapter for use with RDF.rb."
-  #gem.rubyforge_project =
+  gem.rubyforge_project = 'rdf-agraph'
   
   gem.authors = ['Eric Kidd']
   gem.email = 'rdf-agraph@kiddsoftware.com'
