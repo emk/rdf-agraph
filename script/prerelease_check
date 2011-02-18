@@ -1,0 +1,43 @@
+#!/bin/bash
+#
+# Perform pre-release checks under all supported versions of Ruby.  This is
+# a Bash script for ease of interoperation with 'rvm'.
+#
+# Current checks include:
+#   * Running all specs.
+#   * Making sure the examples/foaf_example.rb file works.  This doubles
+#     as a check on our ability to correctly load all necessary headers
+#     when run outside of bundler.
+
+# The versions of Ruby to test against.
+VERSIONS="1.8.7 1.9.2"
+
+# Fail immediately if errors occur.
+set -e
+
+# Load RVM into our shell script so we can switch Ruby interpreters.
+source "$HOME/.rvm/scripts/rvm"
+
+# Install gems and run all our specs under each support version of Ruby.
+for V in $VERSIONS; do
+    echo
+    echo "Testing against $V"
+    echo
+    rvm $V
+
+    # Make sure all the gems we need are installed.
+    bundle install
+
+    # Run our specs.
+    rake
+
+    # Test our installed gem to make sure we require all the necessary
+    # files when bundler is not available.
+    gem build .gemspec
+    gem install rdf-agraph-`cat VERSION`.gem
+    ruby examples/foaf_example.rb
+done
+
+echo
+echo "OK, everything looks good."
+echo
