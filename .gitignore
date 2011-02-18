@@ -1,4 +1,5 @@
 *~
+/*.gem
 /coverage
 /doc/yard
 /.yardoc
