@@ -10,7 +10,7 @@ repo = RDF::AllegroGraph::Repository.new(url, :create => true)
 FOAF = RDF::FOAF  # Standard "friend of a friend" vocabulary.
 EX = RDF::Vocabulary.new("http://example.com/")
 
-# Insert a records describing several people.
+# Insert records describing several people.
 repo.insert(
   # Information about Sam.
   [EX.sam,     RDF.type,   FOAF.Person],
@@ -40,6 +40,15 @@ repo.query(:subject => EX.susan) do |statement|
   puts "  #{statement}"
 end
 
+# Find people with names.  This is run as a SPARQL query.
+puts "Names of users"
+repo.build_query do |q|
+  q.pattern [:person, RDF.type,  FOAF.Person]
+  q.pattern [:person, FOAF.name, :name]
+end.run do |solution|
+  puts "  #{solution.name}: #{solution.person}"
+end
+
 # Open up a session so we can run more advanced queries.  This will require
 # you to enable to following two permissions for 'user'.
 #
@@ -57,7 +66,7 @@ repo.session do |session|
     puts "  #{solution.person}"
   end
 
-  # Find a path from Sam to Richard.
+  # Find a path from Sam to Mike.
   puts "Paths from Sam to Mike"
   session.build_query do |q|
     q.breadth_first_search_paths EX.sam, EX.mike, knows, :path

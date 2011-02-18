@@ -1,11 +1,10 @@
 # rdf-agraph: AllegroGraph adapter for RDF.rb
 
-**This code is a work-in-progress!** Your comments and questions are
-greatly appreciated, but you probably want to speak to me before using this
-code.
 
-This code is a wrapper around phifty's `agraph` gem:
-https://github.com/phifty/agraph
+
+This code is a wrapper around [phifty's `agraph` gem].
+
+[agraph]: https://github.com/phifty/agraph
 
 ## Examples
 
@@ -19,39 +18,102 @@ You may now load an entire file of RDF statements:
     require 'rdf/ntriples'
     repo.load('triples.nt')
 
-You can also insert statements manually:
+To insert statements manually, call `insert`:
 
-    me = RDF::URI('http://example.com/me') 
-    FOAF = RDF::FOAF # "Friend of a friend" vocabulary.
+    # Define some useful RDF vocabularies.
+    FOAF = RDF::FOAF  # Standard "friend of a friend" vocabulary.
+    EX = RDF::Vocabulary.new("http://example.com/")
     
+    # Insert triples into AllegroGraph.
     repo.insert(
-      [me, RDF.type, FOAF.Person],
-      [me, FOAF.mbox, 'mailto:me@example.com']
+      # Information about Sam.
+      [EX.sam,     RDF.type,   FOAF.Person],
+      [EX.sam,     FOAF.name,  'Sam Smith'],
+      [EX.sam,     FOAF.mbox,  'mailto:sam@example.com'],
+    
+      # Information about Susan.
+      [EX.susan,   RDF.type,   FOAF.Person],
+      [EX.susan,   FOAF.name,  'Susan Jones'],
+    
+      # Some more people so we have a nice graph.
+      [EX.rachel,  RDF.type,   FOAF.Person],
+      [EX.richard, RDF.type,   FOAF.Person],
+      [EX.mike,    RDF.type,   FOAF.Person],
+    
+      # Who knows who?
+      [EX.sam,     FOAF.knows, EX.susan],
+      [EX.susan,   FOAF.knows, EX.rachel],
+      [EX.susan,   FOAF.knows, EX.richard],
+      [EX.rachel,  FOAF.knows, EX.mike],
+      [EX.sam,     FOAF.knows, EX.richard]
     )
 
 To query for all statements about a subject, try:
 
-    repo.query(:subject => me) do |statement|
-      puts "Predicate: #{statement.predicate}  Object: #{statement.object}"
+    repo.query(:subject => EX.susan) do |statement|
+      puts statement
     end
     
     # This prints:
-    #   Predicate: http://www.w3.org/1999/02/22-rdf-syntax-ns#type  Object: http://xmlns.com/foaf/0.1/Person
-    #   Predicate: http://xmlns.com/foaf/0.1/mbox  Object: mailto:me@example.com
+    #   <http://example.com/susan> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .
+    #   <http://example.com/susan> <http://xmlns.com/foaf/0.1/name> Susan Jones .
+    #   <http://example.com/susan> <http://xmlns.com/foaf/0.1/knows> <http://example.com/rachel> .
+    #   <http://example.com/susan> <http://xmlns.com/foaf/0.1/knows> <http://example.com/richard> .
 
-You may also build more elaborate queries:
+AllegroGraph also supports fully-optimized queries using RDF.rb's Basic
+Graph Patterns.  For example, to query for all people with known names:
 
-    query = RDF::Query.new do |q|
-      q.pattern [:person, RDF.type, FOAF.Person]
-      q.pattern [:person, FOAF.mbox, :email]
-    end
-    
-    repo.query(query) do |solution|
-      puts "Person: #{solution.person}  Email: #{solution.email}"
+    repo.build_query do |q|
+      q.pattern [:person, RDF.type,  FOAF.Person]
+      q.pattern [:person, FOAF.name, :name]
+    end.run do |solution|
+      puts "#{solution.name}: #{solution.person}"
     end
     
     # This prints:
-    #   Person: http://example.com/me  Email: mailto:me@example.com
+    #  Sam Smith: http://example.com/sam
+    #  Susan Jones: http://example.com/susan
+
+AllegroGraph has a number of more advanced features, including Prolog-style
+queries and support for graph algorithms.  To use these features, you'll
+need to open up a dedicated AllegoGraph session.  This requires the user
+privileges *Start sessions* and *Evaluate arbitrary code*.
+
+    repo.session do |session|
+    
+      # Create a generator.  This will be used to traverse links between
+      # nodes.  It's possible to define a generator using multiple
+      # predicates, backwards links, and other options.
+      knows = session.generator(:object_of => FOAF.knows)
+    
+      # Find everybody within two degrees of Sam.
+      session.build_query do |q|
+        q.ego_group_member EX.sam, 2, knows, :person
+      end.run do |solution|
+        puts solution.person
+      end
+    
+      # This prints:
+      #   http://example.com/sam
+      #   http://example.com/rachel
+      #   http://example.com/richard
+      #   http://example.com/susan
+    
+      # Find a path from Sam to Mike.
+      session.build_query do |q|
+        q.breadth_first_search_paths EX.sam, EX.mike, knows, :path
+      end.run do |solution|
+        puts "Found path:"
+        solution.path.each {|p| puts "  #{p}" }
+      end
+    
+      # This prints:
+      #   Found path:
+      #     http://example.com/sam
+      #     http://example.com/susan
+      #     http://example.com/rachel
+      #     http://example.com/mike
+    end
 
 For more ideas, check out the following websites:
 
