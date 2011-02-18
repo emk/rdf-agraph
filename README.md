@@ -11,12 +11,8 @@ https://github.com/phifty/agraph
 
 To connect to an AllegroGraph repository, call:
 
-    repo = RDF::AllegroGraph::Repository.new({
-      :host => 'localhost', # Optional.
-      :username => 'test',
-      :password => 'test',
-      :repository => 'example'
-    })
+    url = "http://user:passwd@localhost:10035/repositories/example"
+    repo = RDF::AllegroGraph::Repository.new(url, :create => true)
 
 You may now load an entire file of RDF statements:
 
