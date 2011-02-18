@@ -1,3 +1,6 @@
+require 'rdf'
+require 'agraph'
+
 # AllegroGraph integration for RDF.rb.
 module RDF::AllegroGraph
   autoload :Query, 'rdf/allegro_graph/query'

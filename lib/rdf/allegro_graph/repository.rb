@@ -1,3 +1,5 @@
+require 'pathname'
+
 module RDF::AllegroGraph
   # An AllegroGraph RDF repository.
   #
