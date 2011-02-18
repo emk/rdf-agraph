@@ -15,3 +15,13 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
   spec.rcov_opts = "--exclude spec --exclude #{ENV['HOME']}/.bundler"
 end
+
+desc "Build the documentating using Yard"
+task :doc do
+  sh 'yard'
+end
+
+desc "Publish the documentation"
+task :publish_doc => :doc do
+  sh 'scp -r doc/yard/* rdf-agraph.rubyforge.org:/var/www/gforge-projects/rdf-agraph/'
+end
