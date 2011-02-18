@@ -185,6 +185,51 @@ For more ideas, check out the following websites:
 [sna]: http://www.franz.com/agraph/support/documentation/v4/python-tutorial/python-tutorial-40.html#Social Network Analysis
 [spira]: http://spira.rubyforge.org/
 
+## Comparisons of rdf-agraph with other gems
+
+These comparisons were correct (to the best of my knowledge) at the time of
+writing.  However, things are moving quickly in the RDF.rb community, so
+this information may be out of date!
+
+### agraph vs. rdf-agraph
+
+`rdf-agraph` is a wrapper around [phifty's `agraph` gem][agraph_gem], which
+provides a low-level interface to AllegroGraph over HTTP.
+
+* `agraph` provides a richer API for working with geometric primitives,
+  which we don't yet export.
+* `rdf-agraph` provides bulk loads, bulk deletes, a Ruby-based query
+  builder, and better support for Social Network Analysis.
+* `agraph` works with raw, serialized RDF values.  URLs, for example are
+  represented as `"<http://example.com/>"` and strings are represented as
+  `"\"Hello\""`.  The `rdf-agraph` gem uses high-level Ruby objects defined
+  by RDF.rb.
+* `rdf-agraph` is compatible with the huge range of RDF formats and
+  repositories supported by RDF.rb.
+
+### rdf-sesame vs. rdf-agraph
+
+`rdf-sesame` is the standard RDF.rb Sesame driver.  At the time of writing,
+it has very few optimizations.
+
+* `rdf-sesame` does not support bulk inserts, bulk deletes, or optimized
+  queries.  `rdf-agraph` supports all of these.
+* `rdf-sesame` tends to silently ignore network errors and return default
+  values.
+* At the time of writing, `rdf-sesame` sends HTTP requests of the form `GET
+  http://example.com/path HTTP/1.1`, which do not work with AllegroGraph.
+
+### sparql-client vs. rdf-agraph
+
+`sparql-client` is the standard RDF.rb SPARQL client.
+
+* `sparql-client` does not implement the `RDF::Repository` interface.
+  Instead, it implements a custom SPARQL DSL (domain-specific language).
+  This means that it can perform sophisticated queries, but it can't update
+  the contents of the repository.
+* `rdf-agraph` can run raw SPARQL and queries, but does not provide a
+  complete DSL for building either kind of query.
+
 ## Installing AllegroGraph
 
 AllegroGraph runs on 64-bit Intel Linux systems.  Mac and Windows users may
