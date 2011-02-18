@@ -1,10 +1,10 @@
 # rdf-agraph: Ruby AllegroGraph adapter for RDF.rb
 
-[AllegroGraph][allegrograph]&#174; is a commercial RDF data store written
-in Lisp.  AllegroGraph supports advanced queries and social network
-analysis.  You can run [AllegroGraph Free Edition][free] on 64-bit Linux
-systems and store up to 50 million triples.  (See below for installation
-instructions.)
+[AllegroGraph][allegrograph]&#174; is a commercial RDF data store.
+AllegroGraph supports ACID transactions, federation, Prolog-style queries
+and social network analysis.  You can run [AllegroGraph Free Edition][free]
+on 64-bit Linux systems and store up to 50 million triples.  (See below for
+installation instructions.)
 
 [RDF.rb][rdfrb] is an excellent Ruby library for working with RDF.  It
 supports a huge variety of RDF repositories and formats, and it's very
@@ -119,8 +119,8 @@ To query for all statements about a subject, try:
     #   <http://example.com/susan> <http://xmlns.com/foaf/0.1/knows> <http://example.com/rachel> .
     #   <http://example.com/susan> <http://xmlns.com/foaf/0.1/knows> <http://example.com/richard> .
 
-AllegroGraph also supports fully-optimized queries using RDF.rb's Basic
-Graph Patterns.  For example, to query for all people with known names:
+You can also perform fully-optimized queries using RDF.rb's Basic Graph
+Patterns.  For example, to query for all people with known names:
 
     repo.build_query do |q|
       q.pattern [:person, RDF.type,  FOAF.Person]
@@ -188,7 +188,7 @@ For more ideas, check out the following websites:
 * [Spira][spira]: Define Ruby model objects for RDF data.
 
 [agraph_doc]: http://www.franz.com/agraph/support/documentation/v4/
-[sna]: "http://www.franz.com/agraph/support/documentation/v4/python-tutorial/python-tutorial-40.html#Social Network Analysis"
+[sna]: http://www.franz.com/agraph/support/documentation/v4/python-tutorial/python-tutorial-40.html#Social%20Network%20Analysis
 [spira]: http://spira.rubyforge.org/
 
 ## Comparisons with Other Gems
