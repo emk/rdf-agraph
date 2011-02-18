@@ -44,6 +44,21 @@ describe RDF::AllegroGraph::Query do
     end
   end
 
+  describe "#.requires_prolog?" do
+    it "returns false if the query contains no functors" do
+      RDF::AllegroGraph::Query.new(@repository) do |q|
+        q.pattern [:person, RDF.type, FOAF.Person]
+        q.pattern [:person, FOAF.mbox, :email]
+      end.requires_prolog?.should == false
+    end
+
+    it "returns true if the query contains functors" do
+      RDF::AllegroGraph::Query.new(@repository) do |q|
+        q.functor 'ego-group-member', EX.me, 2, FOAF.knows, :person
+      end.requires_prolog?.should == true
+    end
+  end
+
   describe "#to_prolog" do
     it "converts the query to AllegroGraph's Lisp-like Prolog syntax" do
       query = RDF::AllegroGraph::Query.new(@repository) do |q|

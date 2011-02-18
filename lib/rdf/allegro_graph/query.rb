@@ -78,6 +78,14 @@ module RDF::AllegroGraph
         RDF::AllegroGraph::Query::FunctorExpression.new(name, *arguments)
     end
 
+    # Does this query contain Prolog-specific functors that we can't
+    # represent as SPARQL?
+    #
+    # @return [Boolean]
+    def requires_prolog?
+      !patterns.all? {|p| p.kind_of?(RDF::Query::Pattern) }
+    end
+
     # Convert this query to AllegoGraph Prolog notation.
     #
     # @param [RDF::AllegroGraph::Repository] repository
