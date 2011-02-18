@@ -1,10 +1,3 @@
-GIT
-  remote: git://github.com/emk/rdf.git
-  revision: 18202011d29e08b9349b13786be8d07223cdde4e
-  specs:
-    rdf (0.3.1)
-      addressable (>= 2.2)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -15,6 +8,8 @@ GEM
     json (1.5.1)
     rake (0.8.7)
     rcov (0.9.9)
+    rdf (0.3.1)
+      addressable (>= 2.2)
     rdf-spec (0.3.1)
       rspec (>= 2.1)
     rspec (2.5.0)
@@ -33,11 +28,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  agraph
-  json
-  rake
-  rcov
-  rdf!
-  rdf-spec
-  rspec
-  yard
+  agraph (~> 0.1.4)
+  json (>= 0.5.1)
+  rake (>= 0.8.7)
+  rcov (>= 0.9.9)
+  rdf (~> 0.3.1)
+  rdf-spec (~> 0.3.1)
+  rspec (>= 2.5.0)
+  yard (>= 0.6.0)

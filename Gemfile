@@ -1,14 +1,10 @@
 source :rubygems
 
-gem 'rdf', :git => 'git://github.com/emk/rdf.git'
-gem 'agraph'
-gem 'json' # This should be pulled in by agraph, but it isn't.
-
-group :development do
-  gem 'rdf-spec'
-  gem 'rspec'
-  gem 'rake', :require => nil
-  gem 'rcov', :require => nil
-  gem 'yard', :require => nil
+# Automatically compute our required gems based on our Gemspec.  This code
+# is based on http://gist.github.com/277349 .
+gemspec_path = File.join(File.dirname(__FILE__), '.gemspec')
+gemspec = eval(File.read(gemspec_path))
+gemspec.dependencies.each do |dep|
+  group = dep.type == :development ? :development : :default
+  gem dep.name, dep.requirement, :group => group
 end
-
