@@ -1,9 +1,14 @@
 # rdf-agraph: Ruby AllegroGraph adapter for RDF.rb
 
-[RDF.rb][rdfrb] is an excellent Ruby library for working with RDF.
 [AllegroGraph][allegrograph]&#174; is a commercial RDF data store written
-in Lisp.  AllegroGraph supports advanced graph queries and social network
-analysis.
+in Lisp.  AllegroGraph supports advanced queries and social network
+analysis.  You can run [AllegroGraph Free Edition][free] on 64-bit Linux
+systems and store up to 50 million triples.  (See below for installation
+instructions.)
+
+[RDF.rb][rdfrb] is an excellent Ruby library for working with RDF.  It
+supports a huge variety of RDF repositories and formats, and it's very
+convenient to use.
 
 This gem provides an optimized implementaton of RDF.rb's `Repository`
 interface.  It supports bulk loads, bulk deletes, optimized statement
@@ -15,8 +20,8 @@ Note, however, that this gem exposes only a small fraction of
 AllegroGraph's features.  To help add more features, see
 [Contributing](#Contributing_to_rdf-agraph) below.
 
-* [`rdf-agraph` documentation][doc]
-* [`rdf-agraph` GitHub project][src]
+* [Documentation][doc]
+* [GitHub project][src]
 
 This code is a wrapper around [phifty's `agraph` gem][agraph_gem], which
 provides a low-level interface to AllegroGraph over HTTP.
@@ -183,7 +188,7 @@ For more ideas, check out the following websites:
 * [Spira][spira]: Define Ruby model objects for RDF data.
 
 [agraph_doc]: http://www.franz.com/agraph/support/documentation/v4/
-[sna]: http://www.franz.com/agraph/support/documentation/v4/python-tutorial/python-tutorial-40.html#Social Network Analysis
+[sna]: "http://www.franz.com/agraph/support/documentation/v4/python-tutorial/python-tutorial-40.html#Social Network Analysis"
 [spira]: http://spira.rubyforge.org/
 
 ## Comparisons with Other Gems
@@ -195,7 +200,8 @@ this information may be out of date!
 ### agraph vs. rdf-agraph
 
 `rdf-agraph` is a wrapper around [phifty's `agraph` gem][agraph_gem], which
-provides a low-level interface to AllegroGraph over HTTP.
+provides a low-level interface to AllegroGraph over HTTP.  This gem relies
+heavily on his work!
 
 * `agraph` provides a richer API for working with geometric primitives,
   which we don't yet export.
@@ -203,8 +209,8 @@ provides a low-level interface to AllegroGraph over HTTP.
   builder, and better support for Social Network Analysis.
 * `agraph` works with raw, serialized RDF values.  URLs, for example are
   represented as `"<http://example.com/>"` and strings are represented as
-  `"\"Hello\""`.  The `rdf-agraph` gem uses high-level Ruby objects defined
-  by RDF.rb.
+  `"\"Hello\""`.  The `rdf-agraph` gem, on the other hand, uses high-level
+  Ruby objects defined by RDF.rb.
 * `rdf-agraph` is compatible with the huge range of RDF formats and
   repositories supported by RDF.rb.
 
@@ -218,7 +224,8 @@ it has very few optimizations.
 * `rdf-sesame` tends to silently ignore network errors and return default
   values.
 * At the time of writing, `rdf-sesame` sends HTTP requests of the form `GET
-  http://example.com/path HTTP/1.1`, which do not work with AllegroGraph.
+  http://example.com/path HTTP/1.1`, which do not work with AllegroGraph's
+  Sesame endpoint.
 
 ### sparql-client vs. rdf-agraph
 
@@ -228,8 +235,8 @@ it has very few optimizations.
   Instead, it implements a custom SPARQL DSL (domain-specific language).
   This means that it can perform sophisticated queries, but it can't update
   the contents of the repository.
-* `rdf-agraph` can run raw SPARQL and queries, but does not provide a
-  complete DSL for building either kind of query.
+* `rdf-agraph` can run raw SPARQL and Prolog queries, but does not provide
+  a complete DSL for building either kind of query.
 
 ## Installing AllegroGraph
 
@@ -261,7 +268,7 @@ Save this as `/usr/local/bin/agraph-service` and run:
 
 ## A Warning About `fork`
 
-If you use insert statements containing blank nodes into an
+If you insert statements containing blank nodes into an
 RDF::AllegroGraph::Repository, the repository will generate and store a
 list of blank node IDs.  If you later call `fork` (perhaps because you are
 running Unicorn or Spork), you may cause this cache of unused blank node
@@ -290,7 +297,7 @@ on constructing the ideal patch:
   in the past. :-)
 * Provide [RSpec][rspec] specifications for the fix.  This may feel like a
   nuisance, but it ensures that your new feature will still work correctly
-  two releases from now!  I can help you with this if you're not familiar
+  two releases from now.  I can help you with this if you're not familiar
   with RSpec.
 * Document any new APIs using [yard][yard].
 
