@@ -167,7 +167,7 @@ module RDF::AllegroGraph
     # @see    RDF::Queryable#query
     # @see    RDF::Query#execute
     def query_execute(query, &block)
-      if query.respond_to?(:to_prolog)
+      if query.respond_to?(:requires_prolog?) && query.requires_prolog?
         prolog_query(query.to_prolog(self), &block)
       else
         sparql_query(query_to_sparql(query), &block)
