@@ -213,6 +213,18 @@ Save this as `/usr/local/bin/agraph-service` and run:
 [free]: http://www.franz.com/downloads/clp/ag_survey
 [install]: http://www.franz.com/agraph/support/documentation/v4/server-installation.html
 
+## A warning about `fork`
+
+If you use insert statements containing blank nodes into an
+RDF::AllegroGraph::Repository, the repository will generate and store a
+list of blank node IDs.  If you later call `fork` (perhaps because you are
+running Unicorn or Spork), you may cause this cache of unused blank node
+IDs to be shared between two different processes.  This may result in blank
+node IDs being reused for multiple resources.
+
+To avoid this problem, do not insert statements containing blank nodes
+until after you have made any `fork` calls.
+
 ## Contributing to rdf-agraph
 
 Your patches are welcome!  You may contribute patches to `rdf-agraph` by
@@ -245,15 +257,3 @@ Thank you for contributing to `rdf-agraph`!
 [git_commit_message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [rspec]: http://relishapp.com/rspec
 [yard]: http://yardoc.org/
-
-## A warning about `fork`
-
-If you use insert statements containing blank nodes into an
-RDF::AllegroGraph::Repository, the repository will generate and store a
-list of blank node IDs.  If you later call `fork` (perhaps because you are
-running Unicorn or Spork), you may cause this cache of unused blank node
-IDs to be shared between two different processes.  This may result in blank
-node IDs being reused for multiple resources.
-
-To avoid this problem, do not insert statements containing blank nodes
-until after you have made any `fork` calls.
