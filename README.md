@@ -131,8 +131,7 @@ Graph Patterns.  For example, to query for all people with known names:
 AllegroGraph has a number of more advanced features, including Prolog-style
 queries and support for graph algorithms.  To use these features, you'll
 need to open up a dedicated AllegoGraph session.  This requires the
-AllegroGraph user privileges *Start sessions* and *Evaluate arbitrary
-code*.
+AllegroGraph user privileges *Start sessions* and *Evaluate arbitrary code*.
 
     repo.session do |session|
     
@@ -185,7 +184,7 @@ For more ideas, check out the following websites:
 [sna]: http://www.franz.com/agraph/support/documentation/v4/python-tutorial/python-tutorial-40.html#Social Network Analysis
 [spira]: http://spira.rubyforge.org/
 
-## Comparisons of rdf-agraph with other gems
+## Comparisons with Other Gems
 
 These comparisons were correct (to the best of my knowledge) at the time of
 writing.  However, things are moving quickly in the RDF.rb community, so
@@ -258,7 +257,7 @@ Save this as `/usr/local/bin/agraph-service` and run:
 [free]: http://www.franz.com/downloads/clp/ag_survey
 [install]: http://www.franz.com/agraph/support/documentation/v4/server-installation.html
 
-## A warning about `fork`
+## A Warning About `fork`
 
 If you use insert statements containing blank nodes into an
 RDF::AllegroGraph::Repository, the repository will generate and store a
