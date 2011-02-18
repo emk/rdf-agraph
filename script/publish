@@ -1,0 +1,14 @@
+#!/bin/bash
+# Release a new version of this gem.
+if ! git diff-index --quiet HEAD; then
+    echo "ERROR: You haven't checked in all your changes!" 1>&2
+    exit 1
+fi
+
+VERSION="`cat VERSION`"
+
+git tag "v$VERSION"
+gem build .gemspec
+gem push rdf-agraph-"`cat VERSION`".gem
+git push
+git push --tags
