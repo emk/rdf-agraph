@@ -21,7 +21,10 @@ task :doc do
   sh 'yard'
 end
 
-desc "Publish the documentation"
-task :publish_doc => :doc do
-  sh 'scp -r doc/yard/* rdf-agraph.rubyforge.org:/var/www/gforge-projects/rdf-agraph/'
+namespace :doc do
+  desc "Publish the documentation"
+  task :publish => :doc do
+    sh 'scp -r doc/yard/* rdf-agraph.rubyforge.org:/var/www/gforge-projects/rdf-agraph/'
+  end
 end
+
