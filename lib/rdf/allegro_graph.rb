@@ -1,5 +1,6 @@
 require 'rdf'
 require 'agraph'
+require 'enumerator'
 
 # AllegroGraph integration for RDF.rb.
 module RDF::AllegroGraph

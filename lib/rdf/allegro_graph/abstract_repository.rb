@@ -149,8 +149,8 @@ module RDF::AllegroGraph
           end
         end
       else
-        ::Enumerable::Enumerator.new(self, :query_pattern, pattern)
-      end        
+        enum_for(:query_pattern, pattern)
+      end
     end
     protected :query_pattern
 
@@ -188,7 +188,7 @@ module RDF::AllegroGraph
     #   @return [void]
     #
     # @overload sparql_query(pattern)
-    #   @return [Enumerable::Enumerator<RDF::Query::Solution>]
+    #   @return [Enumerator<RDF::Query::Solution>]
     #
     # @param [String] query The query to run.
     # @return [void]
@@ -209,7 +209,7 @@ module RDF::AllegroGraph
     #   @return [void]
     #
     # @overload prolog_query(pattern)
-    #   @return [Enumerable::Enumerator<RDF::Query::Solution>]
+    #   @return [Enumerator<RDF::Query::Solution>]
     #
     # @param [String] query The query to run.
     # @return [void]

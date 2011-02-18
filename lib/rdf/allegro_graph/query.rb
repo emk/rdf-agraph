@@ -47,7 +47,7 @@ module RDF::AllegroGraph
     # attempt to iterate over the solutions!
     #
     # @overload run
-    #   @return [Enumerable::Enumerator<RDF::Query::Solution>]
+    #   @return [Enumerator<RDF::Query::Solution>]
     #
     # @overload run
     #   @yield solution

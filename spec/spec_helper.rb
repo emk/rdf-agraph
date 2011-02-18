@@ -22,3 +22,14 @@ EX = RDF::Vocabulary.new("http://example.com/")
 
 # Load our shared examples.
 require 'shared_abstract_repository_examples'
+
+# Work around an annoying Ruby 1.8 / Ruby 1.9 incompatibility.  We don't
+# actually alias Enumerator into the top-level namespace, because we
+# want our tests to run in a pristine environment.
+def enumerator_class
+  if defined?(Enumerator)
+    Enumerator
+  else
+    Enumerable::Enumerator
+  end
+end
