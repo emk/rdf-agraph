@@ -1,8 +1,8 @@
 # rdf-agraph: Ruby AllegroGraph adapter for RDF.rb
 
 [RDF.rb][rdfrb] is an excellent Ruby library for working with RDF.
-[AllegroGraph][allegrograph] is a commercial RDF data store written in
-Lisp.  AllegroGraph supports advanced graph queries and social network
+[AllegroGraph][allegrograph]&#174; is a commercial RDF data store written
+in Lisp.  AllegroGraph supports advanced graph queries and social network
 analysis.
 
 This gem provides an optimized implementaton of RDF.rb's `Repository`
@@ -20,6 +20,8 @@ AllegroGraph's features.  To help add more features, see
 
 This code is a wrapper around [phifty's `agraph` gem][agraph_gem], which
 provides a low-level interface to AllegroGraph over HTTP.
+
+<small>AllegroGraph&#174; is a registered trademark of Franz, Inc.</small>
 
 [rdfrb]: http://rdf.rubyforge.org/
 [allegrograph]: http://www.franz.com/agraph/allegrograph/
