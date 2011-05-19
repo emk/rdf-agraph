@@ -310,3 +310,9 @@ Thank you for contributing to `rdf-agraph`!
 [git_commit_message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [rspec]: http://relishapp.com/rspec
 [yard]: http://yardoc.org/
+
+## Acknowledgements
+
+Many thanks to the following people for helping to improve `rdf-agraph`:
+
+* Aymeric Brisse: Unit tests for AllegroGraph inference.

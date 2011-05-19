@@ -167,10 +167,16 @@ module RDF::AllegroGraph
     # @see    RDF::Queryable#query
     # @see    RDF::Query#execute
     def query_execute(query, &block)
+      query_options = 
+        if query.respond_to?(:query_options)
+          query.query_options
+        else
+          {}
+        end
       if query.respond_to?(:requires_prolog?) && query.requires_prolog?
-        prolog_query(query.to_prolog(self), &block)
+        prolog_query(query.to_prolog(self), query_options, &block)
       else
-        sparql_query(query_to_sparql(query), &block)
+        sparql_query(query_to_sparql(query), query_options, &block)
       end
     end
     protected :query_execute
@@ -191,13 +197,17 @@ module RDF::AllegroGraph
     #   @return [Enumerator<RDF::Query::Solution>]
     #
     # @param [String] query The query to run.
+    # @param [Hash{Symbol => Object}] query_options
+    #   The query options (see build_query).
     # @return [void]
     # @note This function returns a single-use Enumerator!  If you want to
     #   to treat the results as an array, call `to_a` on it, or you will
     #   re-run the query against the server repeatedly.  This curious
     #   decision is made for consistency with RDF.rb.
-    def sparql_query(query, &block)
-      raw_query(:sparql, query, &block)
+    #
+    # @see #build_query
+    def sparql_query(query, query_options={}, &block)
+      raw_query(:sparql, query, query_options, &block)
     end
 
     # Run a raw Prolog query.
@@ -212,19 +222,32 @@ module RDF::AllegroGraph
     #   @return [Enumerator<RDF::Query::Solution>]
     #
     # @param [String] query The query to run.
+    # @param [Hash{Symbol => Object}] query_options
+    #   The query options (see build_query).
     # @return [void]
     # @note This function returns a single-use Enumerator!  If you want to
     #   to treat the results as an array, call `to_a` on it, or you will
     #   re-run the query against the server repeatedly.  This curious
     #   decision is made for consistency with RDF.rb.
-    def prolog_query(query, &block)
-      raw_query(:prolog, query, &block)
+    #
+    # @see #build_query
+    def prolog_query(query, query_options={}, &block)
+      raw_query(:prolog, query, query_options, &block)
     end
 
     # Run a raw query in the specified language.
-    def raw_query(language, query, &block)
-      @repo.query.language = language
-      results = json_to_query_solutions(@repo.query.perform(query))
+    def raw_query(language, query, query_options={}, &block)
+      # Build our query parameters.
+      params = {
+        :query => query,
+        :queryLn => language.to_s
+      }
+      params[:infer] = query_options[:infer].to_s if query_options[:infer]
+
+      # Run the query and process the results.
+      json = @repo.request_json(:get, path, :parameters => params,
+                                :expected_status_code => 200)
+      results = json_to_query_solutions(json)
       if block_given?
         results.each {|s| yield s }
       else
@@ -235,6 +258,10 @@ module RDF::AllegroGraph
 
     # Construct an AllegroGraph-specific query.
     #
+    # @param [Hash{Symbol => Object}] query_options
+    # @option query_options [true,false,String] :infer
+    #   The AllegroGraph inference mode to use.  Defaults to `false`.  The
+    #   value `true` is equivalent to `'rdfs++'`.
     # @yield query
     # @yieldparam [Query] The query to build.  Use the Query API to add
     #   patterns and functors.
@@ -243,8 +270,8 @@ module RDF::AllegroGraph
     #
     # @see Query
     # @see RDF::Query
-    def build_query(&block)
-      Query.new(self, &block)
+    def build_query(query_options={}, &block)
+      Query.new(self, query_options, &block)
     end
 
 
@@ -351,8 +378,12 @@ module RDF::AllegroGraph
     protected
 
     # Build a repository-relative path.
-    def path(relative_path)
-      "#{@repo.path}/#{relative_path}"
+    def path(relative_path=nil)
+      if relative_path
+        "#{@repo.path}/#{relative_path}"
+      else
+        @repo.path
+      end
     end
 
     # Deserialize an RDF::Value received from the server, or an array of such

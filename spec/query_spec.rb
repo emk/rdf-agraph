@@ -84,4 +84,40 @@ EOD
 EOD
     end
   end
+
+  context "with an RDFS/OWL ontology" do
+    Concepts = RDF::Vocabulary.new("http://www.example.com/Concepts#")
+
+    before do
+      @repository.insert(
+        [Concepts.Celine, RDF.type, Concepts.Woman],
+        [Concepts.Woman, RDF.type, RDF::OWL.Class],
+        [Concepts.Person, RDF.type, RDF::OWL.Class],
+        [Concepts.Woman, RDF::RDFS.subClassOf, Concepts.Person])
+    end
+
+    it "does not run inference by default" do
+      sln = @repository.build_query do |q|
+        q << [Concepts.Celine, RDF.type, :klass]
+      end.run.to_a
+      sln.should include_solution(:klass => Concepts.Woman)
+      sln.should_not include_solution(:klass => Concepts.Person)
+    end
+
+    it "does run inference when passed :infer => true" do
+      sln = @repository.build_query(:infer => true) do |q|
+        q << [Concepts.Celine, RDF.type, :klass]
+      end.run.to_a
+      sln.should include_solution(:klass => Concepts.Woman)
+      sln.should include_solution(:klass => Concepts.Person)      
+    end
+
+    it "does run inference when passed :infer => 'rdfs++'" do
+      sln = @repository.build_query(:infer => 'rdfs++') do |q|
+        q << [Concepts.Celine, RDF.type, :klass]
+      end.run.to_a
+      sln.should include_solution(:klass => Concepts.Woman)
+      sln.should include_solution(:klass => Concepts.Person)      
+    end
+  end
 end

@@ -19,10 +19,16 @@ module RDF::AllegroGraph
     # Include our APIs.
     include Functors::SnaFunctors
 
+    # Our query options.
+    #
+    # @see AbstractRepository#build_query
+    attr_reader :query_options
+
     # Create a new query.
     # @private
-    def initialize(repository, &block)
+    def initialize(repository, query_options={}, &block)
       @repository = repository
+      @query_options = query_options
       super(&block)
     end
 
