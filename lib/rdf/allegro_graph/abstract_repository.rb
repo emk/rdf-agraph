@@ -243,6 +243,7 @@ module RDF::AllegroGraph
         :queryLn => language.to_s
       }
       params[:infer] = query_options[:infer].to_s if query_options[:infer]
+      params[:limit] = query_options[:limit].to_i if query_options[:limit]
 
       # Run the query and process the results.
       json = @repo.request_json(:get, path, :parameters => params,
