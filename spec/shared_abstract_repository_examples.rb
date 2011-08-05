@@ -43,14 +43,23 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
     end
 
     describe "#sparql_query" do
-      it "matches a SPARQL query" do
-        s = @repository.sparql_query(<<EOD)
-SELECT ?name WHERE {
-  <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }
-EOD
-        s.should be_kind_of(enumerator_class)
-        s.should include_solution(:name => "Arto Bendiken")
+      
+      context "when SELECT query" do
+        it "matches a SPARQL query" do
+          s = @repository.sparql_query("SELECT ?name WHERE { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }")
+          s.should be_kind_of(enumerator_class)
+          s.should include_solution(:name => "Arto Bendiken")
+        end
       end
+      
+      context "when CONSTRUCT query" do
+        it "matches a SPARQL query" do
+          s = @repository.sparql_query("CONSTRUCT { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name } WHERE { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }")
+          s.should be_kind_of(RDF::Graph)
+          s.should have_statement(RDF::Statement.new(RDF::URI('http://ar.to/#self'), RDF::URI('http://xmlns.com/foaf/0.1/name'), RDF::Literal('Arto Bendiken')))
+        end
+      end
+      
     end
 
     describe "#prolog_query" do
