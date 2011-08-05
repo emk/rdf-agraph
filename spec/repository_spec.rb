@@ -13,11 +13,10 @@ describe RDF::AllegroGraph::Repository do
 
   describe ".new" do
     it "allows the user to pass a repository URL" do
-      url = "http://test:test@localhost:10035/repositories/rdf_agraph_test"
+      url = "#{REPOSITORY_OPTIONS[:url]}/repositories/#{REPOSITORY_OPTIONS[:id]}"
       @repository2 = RDF::AllegroGraph::Repository.new(url)
-
       statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])
-      @repository.insert(statement)
+      @repository2.insert(statement)
       @repository2.should have_statement(statement)
     end
   end
@@ -25,7 +24,7 @@ describe RDF::AllegroGraph::Repository do
   describe "repository creation and deletion" do
     it "is performed using #new with :create and delete!" do
       server = REPOSITORY_OPTIONS[:server]
-      url = "http://test:test@localhost:10035/repositories/rdf_agraph_test_2"
+      url = "#{REPOSITORY_OPTIONS[:url]}/repositories/rdf_agraph_test_2"
       @repository2 = RDF::AllegroGraph::Repository.new(url, :create => true)
       server.should have_repository('rdf_agraph_test_2')
       @repository2.delete!

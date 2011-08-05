@@ -11,10 +11,11 @@ require 'rdf-agraph'
 
 # Options that we use to connect to a repository.
 REPOSITORY_OPTIONS = {
-  :server => RDF::AllegroGraph::Server.new("http://test:test@localhost:10035"),
-  :id => 'rdf_agraph_test'
+  :server => RDF::AllegroGraph::Server.new('http://test:test@locahost:10035'),
+  :id => 'rdf_agraph_test',
+  :url => 'http://test:test@localhost:10035'
 }
-REPOSITORY_OPTIONS[:server].repository("rdf_agraph_test", :create => true)
+REPOSITORY_OPTIONS[:server].repository(REPOSITORY_OPTIONS[:id], :create => true)
 
 # RDF vocabularies.
 FOAF = RDF::FOAF
