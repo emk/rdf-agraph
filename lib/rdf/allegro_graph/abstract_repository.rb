@@ -207,6 +207,7 @@ module RDF::AllegroGraph
     #
     # @see #build_query
     def sparql_query(query, query_options={}, &block)
+      query_options[:type] = query.split(' ').first.downcase.to_sym unless query.empty?
       raw_query(:sparql, query, query_options, &block)
     end
 
@@ -248,12 +249,19 @@ module RDF::AllegroGraph
       # Run the query and process the results.
       json = @repo.request_json(:get, path, :parameters => params,
                                 :expected_status_code => 200)
-      results = json_to_query_solutions(json)
+      
+      # Parse the result (depends on the type of the query)
+      if language == :sparql and query_options[:type] == :construct
+        results = json_to_graph(json)
+      else
+        results = json_to_query_solutions(json)
+        results = enum_for(:raw_query, language, query) unless block_given?
+      end      
       if block_given?
         results.each {|s| yield s }
       else
-        enum_for(:raw_query, language, query)
-      end
+        results
+      end      
     end
     protected :raw_query
 
@@ -455,6 +463,14 @@ module RDF::AllegroGraph
         end
         RDF::Query::Solution.new(hash)
       end      
+    end
+    
+    # Convert a JSON triples list to a RDF::Graph object.
+    def json_to_graph(json)
+      statements = json.map {|t| RDF::Statement.new(unserialize(t[0]), unserialize(t[1]), unserialize(t[2]))}
+      graph = RDF::Graph.new
+      graph.insert_statements(statements)
+      graph
     end
 
     # Return true if this a blank RDF node.
