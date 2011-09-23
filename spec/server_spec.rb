@@ -6,7 +6,7 @@ describe RDF::AllegroGraph::Server do
   # and modified to remove 'url' and 'connection'.
   describe "RDF::Sesame compatibility" do
     before :each do
-      @url    = "http://test:test@localhost:10035"
+      @url    = REPOSITORY_OPTIONS[:url]
       @server = RDF::AllegroGraph::Server.new(@url)
     end
 

@@ -9,13 +9,21 @@ module RDF::AllegroGraph
   #
   # @see Repository#session
   class Session < AbstractRepository
-    # Create a new session.  This parameter takes an
-    # ::AllegroGraph::Repository object as an argument, so we've not going
-    # to document it publically.
+    # Create a new session.  This function takes a ::AllegroGraph::Repository or 
+    # a ::AllegroGraph::Server object as first argument, and options as second
+    # parameter, which is optional.
     #
     # @private
-    def initialize(agraph_repo)
-      super(::AllegroGraph::Session.create(agraph_repo))
+    def initialize(repository_or_server, options={})
+      # Use of the AllegroGraph wrapped entity
+      agraph_repository_or_server = if repository_or_server.is_a?(Repository)
+        repository_or_server.resource
+      elsif repository_or_server.is_a?(Server)
+        repository_or_server.server
+      else
+        raise ArgumentError.new('Repository or server required')
+      end      
+      super(::AllegroGraph::Session.create(agraph_repository_or_server, options[:session]))
       @last_unique_id = 0
     end
 
@@ -26,7 +34,7 @@ module RDF::AllegroGraph
     # @see #commit
     # @see #rollback
     def close
-      @repo.request_http(:post, path('session/close'),
+      @resource.request_http(:post, path('session/close'),
                          :expected_status_code => 204)
     end
 
@@ -35,7 +43,7 @@ module RDF::AllegroGraph
     # @return [void]
     # @see #rollback
     def commit
-      @repo.commit
+      @resource.commit
     end
 
     # Roll back the changes made since the last commit.
@@ -43,7 +51,7 @@ module RDF::AllegroGraph
     # @return [void]
     # @see #commit
     def rollback
-      @repo.rollback
+      @resource.rollback
     end
 
     # Define an SNA generator.
@@ -63,7 +71,7 @@ module RDF::AllegroGraph
     def generator(options)
       id = unique_id
       generator = SnaGenerator.new(self, options)
-      @repo.request_json(:put, path("snaGenerators/#{id}"),
+      @resource.request_json(:put, path("snaGenerators/#{id}"),
                          :parameters => generator.to_params,
                          :expected_status_code => 204)
       Query::PrologLiteral.new(id.to_sym)

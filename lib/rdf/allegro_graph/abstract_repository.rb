@@ -22,7 +22,8 @@ module RDF::AllegroGraph
     # https://github.com/bendiken/sparql-client/blob/master/lib/sparql/client/repository.rb
     #
     # We actually stack up pretty well against this list.
-
+    
+    attr_reader :resource
 
     #--------------------------------------------------------------------
     # @group RDF::Repository methods
@@ -33,7 +34,7 @@ module RDF::AllegroGraph
     #   The underlying 'agraph'-based implementation to wrap.
     # @private
     def initialize(resource)
-      @repo = resource
+      @resource = resource
       @blank_nodes = []
       @blank_nodes_to_generate = 8
       @blank_nodes_local_to_server = {}
@@ -85,7 +86,7 @@ module RDF::AllegroGraph
     # @param [RDF::Statement] statement
     # @return [Boolean]
     def has_statement?(statement)
-      found = @repo.statements.find(statement_to_dict(statement))
+      found = @resource.statements.find(statement_to_dict(statement))
       !found.empty?
     end
 
@@ -110,7 +111,7 @@ module RDF::AllegroGraph
 
     # How many statements are in this repository?
     #def count
-    #  @repo.request_http(:get, path(:statements),
+    #  @resource.request_http(:get, path(:statements),
     #                     :headers => { 'Accept' => 'text/integer' },
     #                     :expected_status_code => 200).chomp.to_i
     #end
@@ -137,7 +138,7 @@ module RDF::AllegroGraph
         seen = {}
         dict = statement_to_dict(pattern)
         dict.delete(:context) if dict[:context] == 'null'
-        @repo.statements.find(dict).each do |statement|
+        @resource.statements.find(dict).each do |statement|
           unless seen.has_key?(statement)
             seen[statement] = true
             s,p,o,c = statement.map {|v| unserialize(v) }
@@ -247,7 +248,7 @@ module RDF::AllegroGraph
       params[:limit] = query_options[:limit].to_i if query_options[:limit]
 
       # Run the query and process the results.
-      json = @repo.request_json(:get, path, :parameters => params,
+      json = @resource.request_json(:get, path, :parameters => params,
                                 :expected_status_code => 200)
       
       # Parse the result (depends on the type of the query)
@@ -313,7 +314,7 @@ module RDF::AllegroGraph
       # Note that specifying deleteDuplicates on repository creation doesn't
       # seem to affect this.
       json = statements_to_json(statements)
-      @repo.request_json(:post, path(:statements), :body => json,
+      @resource.request_json(:post, path(:statements), :body => json,
                          :expected_status_code => 204)
     end
     protected :insert_statements
@@ -335,7 +336,7 @@ module RDF::AllegroGraph
     # @return [void]
     def delete_statements(statements)
       json = statements_to_json(statements)
-      @repo.request_json(:post, path('statements/delete'),
+      @resource.request_json(:post, path('statements/delete'),
                          :body => json, :expected_status_code => 204)
     end
     protected :delete_statements
@@ -347,7 +348,7 @@ module RDF::AllegroGraph
     #
     # @return [void]
     def clear
-      @repo.statements.delete
+      @resource.statements.delete
     end
 
 
@@ -389,9 +390,9 @@ module RDF::AllegroGraph
     # Build a repository-relative path.
     def path(relative_path=nil)
       if relative_path
-        "#{@repo.path}/#{relative_path}"
+        "#{@resource.path}/#{relative_path}"
       else
-        @repo.path
+        @resource.path
       end
     end
 
@@ -480,7 +481,7 @@ module RDF::AllegroGraph
 
     # Ask AllegroGraph to generate a series of blank node IDs.
     def generate_blank_nodes(amount)
-      response = @repo.request_http(:post, path(:blankNodes),
+      response = @resource.request_http(:post, path(:blankNodes),
                                     :parameters => { :amount => amount },
                                     :expected_status_code => 200)
       response.chomp.split("\n").map {|i| i.gsub(/^_:/, '') }

@@ -11,9 +11,9 @@ require 'rdf-agraph'
 
 # Options that we use to connect to a repository.
 REPOSITORY_OPTIONS = {
-  :server => RDF::AllegroGraph::Server.new('http://test:test@locahost:10035'),
+  :server => RDF::AllegroGraph::Server.new('http://admin:perfect@192.168.0.17:10035'),
   :id => 'rdf_agraph_test',
-  :url => 'http://test:test@localhost:10035'
+  :url => 'http://admin:perfect@192.168.0.17:10035'
 }
 REPOSITORY_OPTIONS[:server].repository(REPOSITORY_OPTIONS[:id], :create => true)
 

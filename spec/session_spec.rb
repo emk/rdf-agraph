@@ -50,4 +50,21 @@ describe RDF::AllegroGraph::Session do
       @repository.should_not have_statement(@statement)
     end
   end
+  
+  describe "custom transaction" do
+    before do
+      @statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])      
+      @session = RDF::AllegroGraph::Session.new(REPOSITORY_OPTIONS[:server], :session => { :store => REPOSITORY_OPTIONS[:id] } )
+      @session.insert(@statement)
+    end
+    
+    it "does not show changes to other sessions before commit is called" do
+      @real_repository.should_not have_statement(@statement)
+    end
+    
+    it "shows changes to other sessions after commit is called" do
+      @session.commit
+      @real_repository.should have_statement(@statement)
+    end    
+  end
 end
