@@ -1,4 +1,4 @@
-#require 'rdf/spec/repository'
+require 'rdf/spec/repository'
 
 RSpec::Matchers.define :include_solution do |hash|
   match do |solutions|
@@ -9,7 +9,7 @@ end
 shared_examples_for RDF::AllegroGraph::AbstractRepository do
   # This pulls in a huge number of specifications from rdf-spec, ensuring
   # that we implement the standard API correctly.
-  #it_should_behave_like RDF_Repository
+  it_should_behave_like RDF_Repository
 
   describe "#supports?" do
     it "returns true if passed :context" do
