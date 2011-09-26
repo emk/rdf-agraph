@@ -19,21 +19,20 @@ module RDF::AllegroGraph
     #   @param [String] url                The URL of the repository.
     #   @param [Hash{Symbol => Object}] options
     #   @option options [Boolean] :create  Create the repository if necessary?
-    def initialize(url_or_options, options={})
-      case url_or_options
+    def initialize(url_or_hash, options={})
+      case url_or_hash
       when String
         # TODO: Clean this up.
-        url = URI.parse(url_or_options)
+        url = URI.parse(url_or_hash)
         path = Pathname.new(url.path)
         url.path = path.parent.parent.to_s
         server = Server.new(url.to_s).server
         id = path.basename
       else
-        server = url_or_options[:server].server
-        id = url_or_options[:id]
-        options = url_or_options
+        server = url_or_hash[:server].server
+        id = url_or_hash[:id]
       end
-      super(::AllegroGraph::Repository.new(server, id))
+      super(::AllegroGraph::Repository.new(server, id), options[:query])
       @resource.create_if_missing! if options[:create]
     end
 

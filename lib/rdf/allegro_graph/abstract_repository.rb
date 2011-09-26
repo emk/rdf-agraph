@@ -24,6 +24,7 @@ module RDF::AllegroGraph
     # We actually stack up pretty well against this list.
     
     attr_reader :resource
+    attr_reader :global_query_options
 
     #--------------------------------------------------------------------
     # @group RDF::Repository methods
@@ -33,12 +34,13 @@ module RDF::AllegroGraph
     # @param [AllegroGraph::Resource] resource
     #   The underlying 'agraph'-based implementation to wrap.
     # @private
-    def initialize(resource)
-      @resource = resource
+    def initialize(resource, options={})
+      @resource = resource      
       @blank_nodes = []
       @blank_nodes_to_generate = 8
       @blank_nodes_local_to_server = {}
       @blank_nodes_server_to_local = {}
+      self.global_query_options = options
     end
 
     # Returns true if `feature` is supported.
@@ -52,6 +54,15 @@ module RDF::AllegroGraph
       end
     end
     
+    # Set the global query options that will be used at each request.
+    # Current supported options are :offset, :limit and :infer.
+    #
+    # @param [Hash] options the options to set
+    #
+    # http://www.franz.com/agraph/support/documentation/current/http-protocol.html#get-post-repo
+    def global_query_options=(options)
+      @global_query_options = filter_query_options(options)
+    end
 
     #--------------------------------------------------------------------
     # @group RDF::Transaction support
@@ -243,9 +254,7 @@ module RDF::AllegroGraph
       params = {
         :query => query,
         :queryLn => language.to_s
-      }
-      params[:infer] = query_options[:infer].to_s if query_options[:infer]
-      params[:limit] = query_options[:limit].to_i if query_options[:limit]
+      }.merge!(@global_query_options).merge!(filter_query_options(query_options))
 
       # Run the query and process the results.
       json = @resource.request_json(:get, path, :parameters => params,
@@ -430,7 +439,7 @@ module RDF::AllegroGraph
         # to operate a single statement.  Otherwise, we will operate
         # on all matching s,p,o triples regardless of context.
         :context => serialize(statement.context) || 'null'
-      }
+      }.merge!(@global_query_options)
     end
 
     # Convert a query to SPARQL.
@@ -528,6 +537,20 @@ module RDF::AllegroGraph
         map_blank_node(value.id, value.id)
         value
       end
+    end    
+        
+    # Set queries/statements options that will be used at each request
+    #
+    # @param [Hash] options options to use. Currently :limit and :infer are supported.
+    # @private
+    def filter_query_options(options)
+      options ||= {}
+      filtered_options = {}
+      [ :limit, :infer, :offset ].each do |key|
+        filtered_options.merge! key => options[key] if options.has_key?(key)
+      end
+      filtered_options
     end
+    protected :filter_query_options
   end
 end

@@ -16,14 +16,15 @@ module RDF::AllegroGraph
     # @private
     def initialize(repository_or_server, options={})
       # Use of the AllegroGraph wrapped entity
-      agraph_repository_or_server = if repository_or_server.is_a?(Repository)
+      agraph_repository_or_server = case repository_or_server
+      when Repository
         repository_or_server.resource
-      elsif repository_or_server.is_a?(Server)
+      when Server
         repository_or_server.server
       else
-        raise ArgumentError.new('Repository or server required')
-      end      
-      super(::AllegroGraph::Session.create(agraph_repository_or_server, options[:session]))
+        Server.new(repository_or_server.to_s).server
+      end
+      super(::AllegroGraph::Session.create(agraph_repository_or_server, options[:session]), options[:query])
       @last_unique_id = 0
     end
 

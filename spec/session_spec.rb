@@ -3,12 +3,12 @@ require 'spec_helper'
 describe RDF::AllegroGraph::Session do
   before :each do
     @real_repository = RDF::AllegroGraph::Repository.new(REPOSITORY_OPTIONS)
-    @repository = @real_repository.session
+    @repository = RDF::AllegroGraph::Session.new(@real_repository)
   end
 
   after :each do
     @repository.close unless @repository.nil? # We might have closed it.
-    @real_repository.clear
+    @real_repository.clear    
   end
 
   it_should_behave_like RDF::AllegroGraph::AbstractRepository

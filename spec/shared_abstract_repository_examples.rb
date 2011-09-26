@@ -59,7 +59,7 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
           s.should have_statement(RDF::Statement.new(RDF::URI('http://ar.to/#self'), RDF::URI('http://xmlns.com/foaf/0.1/name'), RDF::Literal('Arto Bendiken')))
         end
       end
-      
+
     end
 
     describe "#prolog_query" do
@@ -70,6 +70,15 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
 EOD
         s.should be_kind_of(enumerator_class)
         s.should include_solution(:name => "Arto Bendiken")
+      end
+    end
+    
+    describe "#global_query_options" do      
+      it "add parameters to each query" do
+        @repository.global_query_options = { :limit => 1, :offset => 1 }
+        s = @repository.sparql_query("SELECT ?person WHERE { ?person a <http://xmlns.com/foaf/0.1/Person> }")
+        s.should_not include_solution(:person => "http://ar.to/#self")
+        s.should include_solution(:person => "http://bhuga.net/#ben")
       end
     end
 
