@@ -4,11 +4,12 @@ describe RDF::AllegroGraph::Session do
   before :each do
     @real_repository = RDF::AllegroGraph::Repository.new(REPOSITORY_OPTIONS)
     @repository = RDF::AllegroGraph::Session.new(@real_repository)
+    @statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])
   end
 
   after :each do
     @repository.close unless @repository.nil? # We might have closed it.
-    @real_repository.clear    
+    @real_repository.clear
   end
 
   it_should_behave_like RDF::AllegroGraph::AbstractRepository
@@ -21,17 +22,15 @@ describe RDF::AllegroGraph::Session do
     end
 
     it "does not commit outstanding transactions" do
-      @statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])
       @repository.insert(@statement)
       @repository.close
       @repository = nil
-      @real_repository.should_not have_statement(@statement)      
+      @real_repository.should_not have_statement(@statement)
     end
   end
 
   describe "transaction" do
     before do
-      @statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])
       @repository.insert(@statement)
     end
 
@@ -50,21 +49,34 @@ describe RDF::AllegroGraph::Session do
       @repository.should_not have_statement(@statement)
     end
   end
-  
-  describe "custom transaction" do
+
+  describe "transaction with autoCommit" do
     before do
-      @statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])      
-      @session = RDF::AllegroGraph::Session.new(REPOSITORY_OPTIONS[:server], :session => { :store => REPOSITORY_OPTIONS[:id] } )
-      @session.insert(@statement)
+      @repository.close
+      @repository = RDF::AllegroGraph::Session.new(@real_repository, :session => { :autoCommit => true } )
+      @repository.insert(@statement)
     end
-    
-    it "does not show changes to other sessions before commit is called" do
-      @real_repository.should_not have_statement(@statement)
-    end
-    
-    it "shows changes to other sessions after commit is called" do
-      @session.commit
+
+    it "show changes to other sessions before commit is called" do
       @real_repository.should have_statement(@statement)
-    end    
+    end
   end
+
+  describe "transaction with a federated store" do
+    before do
+      @repository.close
+      @repository = RDF::AllegroGraph::Session.new(REPOSITORY_OPTIONS[:server],
+        :session => {
+          :store => [ REPOSITORY_OPTIONS[:id], REPOSITORY_READ_OPTIONS[:id] ],
+          :autoCommit => true
+        },
+        :writable_mirror => @real_repository)
+      @repository.insert(@statement)
+    end
+
+    it "writes the new statements in the writable mirror" do
+      @real_repository.should have_statement(@statement)
+    end
+  end
+
 end

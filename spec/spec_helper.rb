@@ -15,7 +15,13 @@ REPOSITORY_OPTIONS = {
   :id => 'rdf_agraph_test',
   :url => 'http://admin:perfect@192.168.0.17:10035'
 }
-REPOSITORY_OPTIONS[:server].repository(REPOSITORY_OPTIONS[:id], :create => true)
+
+REPOSITORY_READ_OPTIONS = REPOSITORY_OPTIONS.clone
+REPOSITORY_READ_OPTIONS[:id] = 'rdf_agraph_test_read'
+
+[ REPOSITORY_OPTIONS, REPOSITORY_READ_OPTIONS ].each do |h|
+  h[:server].repository(h[:id], :create => true)
+end
 
 # RDF vocabularies.
 FOAF = RDF::FOAF

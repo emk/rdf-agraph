@@ -6,7 +6,7 @@ module RDF::AllegroGraph
   # Note that this class does not interoperate well with the Unix `fork`
   # command if you're using blank nodes.  See README.md for details.
   class Repository < AbstractRepository
-    
+
     # Create a new AllegroGraph repository adapter.
     #
     # @overload initialize(options)
@@ -32,8 +32,9 @@ module RDF::AllegroGraph
         server = url_or_hash[:server].server
         id = url_or_hash[:id]
       end
-      super(::AllegroGraph::Repository.new(server, id), options[:query])
-      @resource.create_if_missing! if options[:create]
+      opt_create = options.delete(:create)
+      super(::AllegroGraph::Repository.new(server, id), options)
+      @resource.create_if_missing! if opt_create
     end
 
     # Delete this repository if it exists.
@@ -41,7 +42,7 @@ module RDF::AllegroGraph
     # @return [void]
     def delete!
       @resource.delete!
-    end    
+    end
 
     # Create a new, persistent AllegroGraph session on a given repository.
     # If called without a block, simply returns the new session (and expects
@@ -79,7 +80,7 @@ module RDF::AllegroGraph
         Session.new(repository, options)
       end
     end
-    
+
     # Create a new, persistent AllegroGraph session.  If called without a
     # block, simply returns the new session (and expects the caller to
     # close it).  If called with a block, automatically commits or rolls

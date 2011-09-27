@@ -7,7 +7,7 @@ module RDF::AllegroGraph
   #
   # @see RDF::Sesame::Server
   class Server
-    attr_reader :server # @private
+    attr_reader :server
 
     # Create a new Server object.
     #
@@ -19,7 +19,7 @@ module RDF::AllegroGraph
         :username => parsed.user, :password => parsed.password
       }
       @server = AllegroGraph::Server.new(options)
-      
+
       unless parsed.path.nil? || parsed.path.empty? || parsed.path == "/"
         err = "AllegroGraph URLs with paths not supported: #{url}"
         raise ArgumentError.new(err)
@@ -77,7 +77,7 @@ module RDF::AllegroGraph
     def repository(id, options={})
       result = repositories[id]
       if result.nil? && options[:create]
-        result = Repository.new(:server => self, :id => id, :create => true)
+        result = Repository.new({:server => self, :id => id}, :create => true)
       end
       result
     end

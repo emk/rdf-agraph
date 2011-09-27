@@ -22,7 +22,7 @@ module RDF::AllegroGraph
     # https://github.com/bendiken/sparql-client/blob/master/lib/sparql/client/repository.rb
     #
     # We actually stack up pretty well against this list.
-    
+
     attr_reader :resource
     attr_reader :global_query_options
 
@@ -35,12 +35,13 @@ module RDF::AllegroGraph
     #   The underlying 'agraph'-based implementation to wrap.
     # @private
     def initialize(resource, options={})
-      @resource = resource      
+      @resource = resource
+      @resource_writable = options[:writable_repository] || resource
       @blank_nodes = []
       @blank_nodes_to_generate = 8
       @blank_nodes_local_to_server = {}
       @blank_nodes_server_to_local = {}
-      self.global_query_options = options
+      self.global_query_options = options[:query]
     end
 
     # Returns true if `feature` is supported.
@@ -53,7 +54,7 @@ module RDF::AllegroGraph
       else super
       end
     end
-    
+
     # Set the global query options that will be used at each request.
     # Current supported options are :offset, :limit and :infer.
     #
@@ -179,7 +180,7 @@ module RDF::AllegroGraph
     # @see    RDF::Queryable#query
     # @see    RDF::Query#execute
     def query_execute(query, &block)
-      query_options = 
+      query_options =
         if query.respond_to?(:query_options)
           query.query_options
         else
@@ -259,19 +260,19 @@ module RDF::AllegroGraph
       # Run the query and process the results.
       json = @resource.request_json(:get, path, :parameters => params,
                                 :expected_status_code => 200)
-      
+
       # Parse the result (depends on the type of the query)
       if language == :sparql and query_options[:type] == :construct
         results = json_to_graph(json)
       else
         results = json_to_query_solutions(json)
         results = enum_for(:raw_query, language, query) unless block_given?
-      end      
+      end
       if block_given?
         results.each {|s| yield s }
       else
         results
-      end      
+      end
     end
     protected :raw_query
 
@@ -323,7 +324,7 @@ module RDF::AllegroGraph
       # Note that specifying deleteDuplicates on repository creation doesn't
       # seem to affect this.
       json = statements_to_json(statements)
-      @resource.request_json(:post, path(:statements), :body => json,
+      @resource_writable.request_json(:post, path_writable(:statements), :body => json,
                          :expected_status_code => 204)
     end
     protected :insert_statements
@@ -345,7 +346,7 @@ module RDF::AllegroGraph
     # @return [void]
     def delete_statements(statements)
       json = statements_to_json(statements)
-      @resource.request_json(:post, path('statements/delete'),
+      @resource_writable.request_json(:post, path_writable('statements/delete'),
                          :body => json, :expected_status_code => 204)
     end
     protected :delete_statements
@@ -357,7 +358,7 @@ module RDF::AllegroGraph
     #
     # @return [void]
     def clear
-      @resource.statements.delete
+      @resource_writable.statements.delete
     end
 
 
@@ -405,6 +406,15 @@ module RDF::AllegroGraph
       end
     end
 
+    # Build a repository-relative path for the writable mirror
+    def path_writable(relative_path=nil)
+      if relative_path
+        "#{@resource_writable.path}/#{relative_path}"
+      else
+        @resource_writable.path
+      end
+    end
+
     # Deserialize an RDF::Value received from the server, or an array of such
     # values when working with Prolog queries.
     #
@@ -425,7 +435,7 @@ module RDF::AllegroGraph
         tuple = [s.subject, s.predicate, s.object]
         tuple << s.context if s.context
         tuple.map {|v| serialize(v) }
-      end        
+      end
     end
 
     # Translate a RDF::Statement into a dictionary the we can pass
@@ -472,9 +482,9 @@ module RDF::AllegroGraph
           hash[name] = unserialize(match[i]) unless match[i].nil?
         end
         RDF::Query::Solution.new(hash)
-      end      
+      end
     end
-    
+
     # Convert a JSON triples list to a RDF::Graph object.
     def json_to_graph(json)
       statements = json.map {|t| RDF::Statement.new(unserialize(t[0]), unserialize(t[1]), unserialize(t[2]))}
@@ -537,11 +547,13 @@ module RDF::AllegroGraph
         map_blank_node(value.id, value.id)
         value
       end
-    end    
-        
+    end
+
     # Set queries/statements options that will be used at each request
     #
     # @param [Hash] options options to use. Currently :limit and :infer are supported.
+    # @return [Hash] the options
+
     # @private
     def filter_query_options(options)
       options ||= {}

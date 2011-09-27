@@ -9,7 +9,7 @@ module RDF::AllegroGraph
   #
   # @see Repository#session
   class Session < AbstractRepository
-    # Create a new session.  This function takes a ::AllegroGraph::Repository or 
+    # Create a new session.  This function takes a ::AllegroGraph::Repository or
     # a ::AllegroGraph::Server object as first argument, and options as second
     # parameter, which is optional.
     #
@@ -24,7 +24,20 @@ module RDF::AllegroGraph
       else
         Server.new(repository_or_server.to_s).server
       end
-      super(::AllegroGraph::Session.create(agraph_repository_or_server, options[:session]), options[:query])
+      opt_session = options.delete(:session)
+      opt_writable_mirror = options.delete(:writable_mirror)
+
+      if opt_writable_mirror
+        options[:writable_repository] =
+        case opt_writable_mirror
+        when Repository
+          opt_writable_mirror.resource
+         else
+          Repository.new(opt_writable_mirror).resource
+        end
+      end
+
+      super(::AllegroGraph::Session.create(agraph_repository_or_server, opt_session), options)
       @last_unique_id = 0
     end
 
