@@ -12,6 +12,7 @@ module RDF::AllegroGraph
     # @overload initialize(options)
     #   @param [Hash{Symbol => Object}] options
     #   @option options [Server]  :server  The server hosting the repository.
+    #   @option options [Catalog] :catalog  The catalog hosting the repository.
     #   @option options [String]  :id      The name of the repository.
     #   @option options [Boolean] :create  Create the repository if necessary?
     #
@@ -20,20 +21,19 @@ module RDF::AllegroGraph
     #   @param [Hash{Symbol => Object}] options
     #   @option options [Boolean] :create  Create the repository if necessary?
     def initialize(url_or_hash, options={})
-      case url_or_hash
-      when String
-        # TODO: Clean this up.
-        url = URI.parse(url_or_hash)
-        path = Pathname.new(url.path)
-        url.path = path.parent.parent.to_s
-        server = Server.new(url.to_s).server
-        id = path.basename
+      url_or_hash = Parser::parse_uri(url_or_hash) if url_or_hash.is_a?(String)
+
+      if url_or_hash.has_key?(:catalog)
+        server_or_catalog = url_or_hash[:catalog].catalog
+      elsif url_or_hash.has_key?(:server)
+        server_or_catalog = url_or_hash[:server].server
       else
-        server = url_or_hash[:server].server
-        id = url_or_hash[:id]
+        raise ArgumentError.new('Server or Catalog required')
       end
+
+      id = url_or_hash[:id]
       opt_create = options.delete(:create)
-      super(::AllegroGraph::Repository.new(server, id), options)
+      super(::AllegroGraph::Repository.new(server_or_catalog, id), options)
       @resource.create_if_missing! if opt_create
     end
 

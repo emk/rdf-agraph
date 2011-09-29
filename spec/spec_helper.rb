@@ -11,16 +11,30 @@ require 'rdf-agraph'
 
 # Options that we use to connect to a repository.
 REPOSITORY_OPTIONS = {
-  :server => RDF::AllegroGraph::Server.new('http://admin:perfect@192.168.0.17:10035'),
   :id => 'rdf_agraph_test',
-  :url => 'http://admin:perfect@192.168.0.17:10035'
+  :url => 'http://test:test@localhost:10035'
+}
+server = RDF::AllegroGraph::Server.new(REPOSITORY_OPTIONS[:url])
+server.repository(REPOSITORY_OPTIONS[:id], :create => true)
+REPOSITORY_OPTIONS[:server] = server
+
+CATALOG_REPOSITORY_OPTIONS = {
+  :id => 'rdf_agraph_test',
+  :catalog_id => 'catalog_rdf_agraph_test'
 }
 
-REPOSITORY_READ_OPTIONS = REPOSITORY_OPTIONS.clone
-REPOSITORY_READ_OPTIONS[:id] = 'rdf_agraph_test_read'
-
-[ REPOSITORY_OPTIONS, REPOSITORY_READ_OPTIONS ].each do |h|
-  h[:server].repository(h[:id], :create => true)
+begin
+  catalog = server.catalog(CATALOG_REPOSITORY_OPTIONS[:catalog_id], :create => true)
+  catalog.repository(CATALOG_REPOSITORY_OPTIONS[:id], :create => true)
+  CATALOG_REPOSITORY_OPTIONS[:catalog] = catalog
+  CATALOG_REPOSITORY_OPTIONS[:server] = server
+rescue
+  puts "---------------------------"
+  puts "Error : Your AllegroGraph server must be configured with the directive 'DynamicCatalogs'."
+  puts "Without it, dynamic creation of catalogs using HTTP is not possible."
+  puts "See http://www.franz.com/agraph/support/documentation/current/daemon-config.html#DynamicCatalogs"
+  puts "---------------------------"
+  exit
 end
 
 # RDF vocabularies.

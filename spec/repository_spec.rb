@@ -19,6 +19,14 @@ describe RDF::AllegroGraph::Repository do
       @repository2.insert(statement)
       @repository2.should have_statement(statement)
     end
+
+    it "allows the user to pass a repository URL belonging to a catalog" do
+      @repository2 = RDF::AllegroGraph::Repository.new(CATALOG_REPOSITORY_OPTIONS)
+      statement = RDF::Statement.from([EX.me, RDF.type, FOAF.Person])
+      @repository2.insert(statement)
+      @repository2.should have_statement(statement)
+      @repository2.clear
+    end
   end
 
   describe "repository creation and deletion" do
@@ -29,7 +37,7 @@ describe RDF::AllegroGraph::Repository do
       server.should have_repository('rdf_agraph_test_2')
       @repository2.delete!
       server.should_not have_repository('rdf_agraph_test_2')
-    end    
+    end
   end
 
   describe "#session" do

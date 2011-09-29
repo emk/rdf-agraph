@@ -51,6 +51,44 @@ describe RDF::AllegroGraph::Server do
       @server.each_repository do |repository|
         repository.should be_instance_of(RDF::AllegroGraph::Repository)
       end
-    end    
+    end
+
+    it "returns available catalogs" do
+      @server.should respond_to(:catalogs)
+      @server.catalogs.should be_a_kind_of(Enumerable)
+      @server.catalogs.should be_instance_of(Hash)
+      @server.catalogs.each do |identifier, catalog|
+        identifier.should be_instance_of(String)
+        catalog.should be_instance_of(RDF::AllegroGraph::Catalog)
+      end
+    end
+
+    it "indicates whether a catalog exists" do
+      @server.should respond_to(:has_catalog?)
+      @server.has_catalog?(CATALOG_REPOSITORY_OPTIONS[:catalog_id]).should be_true
+      @server.has_catalog?(:foobar).should be_false
+    end
+
+    it "returns existing catalog" do
+      @server.should respond_to(:catalog)
+      catalog = @server.catalog(CATALOG_REPOSITORY_OPTIONS[:catalog_id])
+      catalog.should_not be_nil
+      catalog.should be_instance_of(RDF::AllegroGraph::Catalog)
+    end
+
+    it "does not return nonexistent catalogs" do
+      lambda { @server.catalog(:foobar) }.should_not raise_error
+      catalog = @server.catalog(:foobar)
+      catalog.should be_nil
+    end
+
+    it "supports enumerating catalogs" do
+      @server.should respond_to(:each_catalog, :each)
+      # @server.each_repository.should be_an_enumerator
+      @server.each_catalog do |catalog|
+        catalog.should be_instance_of(RDF::AllegroGraph::Catalog)
+      end
+    end
+
   end
 end

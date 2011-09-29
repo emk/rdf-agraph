@@ -83,6 +83,52 @@ module RDF::AllegroGraph
     end
     alias_method :[], :repository
 
+    # Return a hash table of all catalogs on this server.
+    #
+    # @return [Hash<String,Catalog>]
+    def catalogs
+      result = {}
+      @server.request_json(:get, path(:catalogs),
+                           :expected_status_code => 200).each do |catalog|
+        result[catalog['id']] = Catalog.new(:server => self, :id => catalog['id'])
+      end
+      result
+    end
+
+    # Return true if the specified catalog exists on the server.
+    #
+    # @param [String] id The name of the catalog.
+    # @return [Boolean]
+    def has_catalog?(id)
+      catalogs.has_key?(id)
+    end
+
+    # Iterate over all catalogs.
+    #
+    # @yield catalog
+    # @yieldparam [Catalog] catalog
+    # @yieldreturn [void]
+    # @return [void]
+    def each_catalog(&block)
+      catalogs.values.each(&block)
+    end
+
+    # Look up a specific catalog by name, and optionally create it.
+    #
+    # @param [String] id The name of the catalog.
+    # @param [Hash] options
+    # @option options [Boolean] :create
+    #   If true, and the catalog does not exist, create it.
+    # @return [Repository,nil]
+    #   The catalog, if it exists or was created, or nil otherwise.
+    def catalog(id, options={})
+      result = catalogs[id]
+      if result.nil? && options[:create]
+        result = Catalog.new({:server => self, :id => id}, :create => true)
+      end
+      result
+    end
+
     protected
 
     # Generate a path to a resource on the server.

@@ -64,10 +64,13 @@ describe RDF::AllegroGraph::Session do
 
   describe "transaction with a federated store" do
     before do
+
+      REPOSITORY_OPTIONS[:server].repository('rdf_agraph_test_read', :create => true)
+
       @repository.close
       @repository = RDF::AllegroGraph::Session.new(REPOSITORY_OPTIONS[:server],
         :session => {
-          :store => [ REPOSITORY_OPTIONS[:id], REPOSITORY_READ_OPTIONS[:id] ],
+          :store => [ REPOSITORY_OPTIONS[:id], 'rdf_agraph_test_read' ],
           :autoCommit => true
         },
         :writable_mirror => @real_repository)
