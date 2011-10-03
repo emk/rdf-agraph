@@ -68,6 +68,27 @@ module RDF::AllegroGraph
       @resource.rollback
     end
 
+    # Let the session know you still want to keep it alive. (Any other request to the session will have the same effect.)
+    #
+    # @return [Boolean] returns true if the operation was sucessful
+    def ping
+      @resource.request_http(:get, path('session/ping'),
+                         :expected_status_code => 200) == 'pong'
+    end
+
+    # Returns true if the session is still alive.
+    # Basically it pings the session. If the TCP connection is refused,
+    # it means that the session has been closed.
+    #
+    # @return [Boolean] returns the status of the session
+    def still_alive?
+      begin
+        ping
+      rescue Errno::ECONNREFUSED
+        false
+      end
+    end
+
     # Define an SNA generator.
     #
     # @param [Hash] options

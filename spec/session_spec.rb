@@ -29,6 +29,21 @@ describe RDF::AllegroGraph::Session do
     end
   end
 
+  describe "#ping" do
+    it "pings the session" do
+      @repository.ping.should be_true
+    end
+  end
+
+  describe "#still_alive?" do
+    it "indicates if the session is still alive" do
+      @repository.still_alive?.should be_true
+      @repository.close
+      @repository.still_alive?.should be_false
+      @repository = nil
+    end
+  end
+
   describe "transaction" do
     before do
       @repository.insert(@statement)
