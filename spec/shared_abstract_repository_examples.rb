@@ -27,6 +27,12 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
       @repository.load(path)
     end
 
+    describe "#size" do
+      it "returns the amount of statements in the repository" do
+        @repository.size.should eql(73)
+      end
+    end
+
     describe "#delete_statement (protected)" do
       it "deletes a single, valid statement" do
         stmt = RDF::Statement.new(RDF::URI("http://ar.to/#self"),
@@ -43,7 +49,7 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
     end
 
     describe "#sparql_query" do
-      
+
       context "when SELECT query" do
         it "matches a SPARQL query" do
           s = @repository.sparql_query("SELECT ?name WHERE { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }")
@@ -51,7 +57,7 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
           s.should include_solution(:name => "Arto Bendiken")
         end
       end
-      
+
       context "when CONSTRUCT query" do
         it "matches a SPARQL query" do
           s = @repository.sparql_query("CONSTRUCT { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name } WHERE { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }")
@@ -72,8 +78,8 @@ EOD
         s.should include_solution(:name => "Arto Bendiken")
       end
     end
-    
-    describe "#global_query_options" do      
+
+    describe "#global_query_options" do
       it "add parameters to each query" do
         @repository.global_query_options = { :limit => 1, :offset => 1 }
         s = @repository.sparql_query("SELECT ?person WHERE { ?person a <http://xmlns.com/foaf/0.1/Person> }")

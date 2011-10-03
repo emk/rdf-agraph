@@ -65,6 +65,13 @@ module RDF::AllegroGraph
       @global_query_options = filter_query_options(options)
     end
 
+    # Returns the amount of statements in the repository, as an integer
+    #
+    # @return [Integer] the number of statements
+    def size
+      @resource.size
+    end
+
     #--------------------------------------------------------------------
     # @group RDF::Transaction support
     #
