@@ -23,7 +23,7 @@ module RDF::AllegroGraph
     #
     # We actually stack up pretty well against this list.
 
-    attr_reader :resource
+    attr_reader :resource, :resource_writable
     attr_reader :global_query_options
 
     #--------------------------------------------------------------------
