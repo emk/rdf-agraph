@@ -24,7 +24,7 @@ module RDF::AllegroGraph
       else
         Server.new(repository_or_server.to_s).server
       end
-      opt_session = options.delete(:session)
+      opt_session = options.delete(:session) || {}
       opt_writable_mirror = options.delete(:writable_mirror)
 
       if opt_writable_mirror
