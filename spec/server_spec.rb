@@ -96,5 +96,25 @@ describe RDF::AllegroGraph::Server do
       content.should be_instance_of(String)
     end
 
+    it "list scripts" do
+      @server.should respond_to(:scripts)
+    end
+
+    it "create scripts" do
+      @server.should respond_to(:save_script)
+      @server.save_script 'subfolder/script', ';; COMMENT'
+      @server.scripts.should include 'subfolder/script'
+    end
+
+    it "get scripts" do
+      @server.should respond_to(:get_script)
+      @server.get_script('subfolder/script').should == ';; COMMENT'
+    end
+
+    it "remove scripts" do
+      @server.should respond_to(:remove_script)
+      @server.remove_script('subfolder/script')
+      @server.scripts.should_not include 'subfolder/script'
+    end
   end
 end

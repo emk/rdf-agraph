@@ -141,6 +141,65 @@ module RDF::AllegroGraph
       content
     end
 
+    # A set of scripts, which are Common Lisp programs, can be stored in a server.
+    # When a user creates a session, they can choose to load one or more of these scripts into the session.
+    # This service returns a list of names, representing the scripts that are currently present.
+    #
+    # @param [String] path a filter on the subfolder to look scripts into
+    # @return [Array] the scripts list
+    def scripts(path=nil)
+      full_path = "/scripts"
+      full_path = "#{full_path}/#{path}" if path
+
+      @server.request_json(:get, full_path,
+                           :expected_status_code => 200)
+    end
+
+    # Get a script content
+    #
+    # @param [String] path the name of the script
+    # @return [String] the script
+    def script(path)
+      full_path = "/scripts/#{path}"
+
+      begin
+        @server.request_http(:get, full_path,
+                           :expected_status_code => 200)
+      rescue Transport::UnexpectedStatusCodeError => error
+        if /No script '[^']+' found./ =~ error.message
+          nil
+        else
+          raise error
+        end
+      end
+    end
+
+    alias_method :get_script, :script
+
+    # Replace the named script with a new one (or creates a new script).
+    # Scripts whose name ends in .fasl are assumed to be compiled Lisp code (you are responsible for ensuring that it is compatible with the server),
+    # anything else is assumed to be raw Common Lisp code, which the server will compile.
+    #
+    # @param [String] path the name of the script
+    # @param [String] content the script content
+    # @return [void]
+    def save_script(path, content)
+      full_path = "/scripts/#{path}"
+
+      @server.request_http(:put, full_path,
+                           :body => content)
+    end
+
+    # Delete the script with the given path
+    #
+    # @param [String] path the name of the script
+    # @return [void]
+    def remove_script(path)
+      full_path = "/scripts/#{path}"
+
+      @server.request_http(:delete, full_path)
+    end
+
     protected
 
     # Generate a path to a resource on the server.
