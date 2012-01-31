@@ -129,6 +129,18 @@ module RDF::AllegroGraph
       result
     end
 
+    # An initialization-file can be specified for a server, which is a collection of Common Lisp code
+    # that is executed in every shared back-end as it is created. This retrieves that file.
+    # If no initfile has been defined, nil is returned.
+    #
+    # @return [String] the content of the file
+    def initfile
+      if (content = @server.request_http(:get, '/initfile')) == "No initfile defined."
+        content = nil
+      end
+      content
+    end
+
     protected
 
     # Generate a path to a resource on the server.

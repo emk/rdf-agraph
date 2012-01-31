@@ -90,5 +90,11 @@ describe RDF::AllegroGraph::Server do
       end
     end
 
+    it "returns the initfile" do
+      @server.should respond_to(:initfile)
+      content = @server.initfile || ""
+      content.should be_instance_of(String)
+    end
+
   end
 end
