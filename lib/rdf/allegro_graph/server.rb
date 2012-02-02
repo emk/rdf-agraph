@@ -186,8 +186,7 @@ module RDF::AllegroGraph
     def save_script(path, content)
       full_path = "/scripts/#{path}"
 
-      @server.request_http(:put, full_path,
-                           :body => content)
+      @server.request_http(:put, full_path, :body => content, :expected_status_code => 204)
     end
 
     # Delete the script with the given path
@@ -197,7 +196,7 @@ module RDF::AllegroGraph
     def remove_script(path)
       full_path = "/scripts/#{path}"
 
-      @server.request_http(:delete, full_path)
+      @server.request_http(:delete, full_path, :expected_status_code => 204)
     end
 
     protected
