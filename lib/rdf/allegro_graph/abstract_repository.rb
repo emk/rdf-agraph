@@ -363,9 +363,14 @@ module RDF::AllegroGraph
 
     # Clear all statements from the repository.
     #
+    # @param [Hash] options
+    # @option options [String] :subject Match a specific subject
+    # @option options [String] :predicate Match a specific predicate
+    # @option options [String] :object Match a specific object
+    # @option options [String] :context Match a specific graph name.
     # @return [void]
-    def clear
-      @resource_writable.statements.delete
+    def clear(options = {})
+      @resource_writable.statements.delete(options)
     end
 
 
