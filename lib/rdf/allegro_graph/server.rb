@@ -15,7 +15,7 @@ module RDF::AllegroGraph
     def initialize(url="http://localhost:10035")
       parsed = URI.parse(url)
       options = {
-        :host => parsed.host, :post => parsed.port,
+        :host => parsed.host, :port => parsed.port,
         :username => parsed.user, :password => parsed.password
       }
       @server = AllegroGraph::Server.new(options)
