@@ -22,15 +22,14 @@ Gem::Specification.new do |gem|
   
   gem.required_ruby_version = '>= 1.8.7'
 
-  gem.add_runtime_dependency 'rdf',    '~> 0.3.1'
-  gem.add_runtime_dependency 'agraph', '~> 0.1.4'
+  gem.add_runtime_dependency 'rdf',    '>= 0.3.5'
+  gem.add_runtime_dependency 'agraph', '>= 0.1.5'
   # This should be pulled in by agraph, but it isn't.
-  gem.add_runtime_dependency 'json',   '>= 0.5.1'
+  gem.add_runtime_dependency 'json',   '~> 1.7'
 
-  gem.add_development_dependency 'rdf-spec',  '~> 0.3.1'
+  gem.add_development_dependency 'rdf-spec',  '>= 0.3.5.1'
   gem.add_development_dependency 'yard',      '>= 0.6.0'
   gem.add_development_dependency 'BlueCloth', '>= 1.0.1' # For yard.
   gem.add_development_dependency 'rspec',     '>= 2.5.0'
-  gem.add_development_dependency 'rcov',      '>= 0.9.9'
   gem.add_development_dependency 'rake',      '>= 0.8.7'
 end
