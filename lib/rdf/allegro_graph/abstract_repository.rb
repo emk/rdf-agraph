@@ -388,6 +388,7 @@ module RDF::AllegroGraph
     def serialize(value)
       case value
       when RDF::Query::Variable then value.to_s
+      when false then nil
       else RDF::NTriples::Writer.serialize(map_to_server(value))
       end
     end
@@ -469,7 +470,7 @@ module RDF::AllegroGraph
       variables = []
       patterns = []
       query.patterns.each do |p|
-        p.variables.each {|_,v| variables << v unless variables.include?(v) }
+        variables.concat(p.variables.values)
         triple = [p.subject, p.predicate, p.object]
         str = triple.map {|v| serialize(v) }.join(" ")
         # TODO: Wrap in graph block for context!
@@ -478,7 +479,7 @@ module RDF::AllegroGraph
         end
         patterns << "#{str} ."
       end
-      "SELECT #{variables.join(" ")}\nWHERE {\n  #{patterns.join("\n  ")} }"
+      "SELECT #{variables.uniq.join(" ")}\nWHERE {\n  #{patterns.join("\n  ")} }"
     end
 
     # Convert a JSON query solution to a list of RDF::Query::Solution

@@ -1,4 +1,5 @@
 require 'rdf'
+require 'rdf/ntriples'
 require 'agraph'
 require 'enumerator'
 

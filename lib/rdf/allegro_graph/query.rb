@@ -102,10 +102,10 @@ module RDF::AllegroGraph
       functors = []
       patterns.each do |p|
         # Extract any new variables we see in the query.
-        p.variables.each {|_,v| variables << v unless variables.include?(v) }
+        variables.concat(p.variables.values)
         functors << convert_to_functor(p).to_prolog(repository)
       end
-      "(select (#{variables.join(" ")})\n  #{functors.join("\n  ")})"
+      "(select (#{variables.uniq.join(" ")})\n  #{functors.join("\n  ")})"
     end
 
     protected

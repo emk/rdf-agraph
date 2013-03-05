@@ -79,7 +79,7 @@ describe RDF::AllegroGraph::Functors::SnaFunctors do
           q.neighbor_count(EX.me, @knows, :n)
         end.run.to_a
         solutions.length.should == 1
-        solutions.first.n.should == 3
+        solutions.first.n.object.should == 3
       end
     end
 

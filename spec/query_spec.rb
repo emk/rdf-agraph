@@ -1,23 +1,25 @@
 require 'spec_helper'
-require 'rdf/spec/query'
+require 'rdf/spec/queryable'
 
 describe RDF::AllegroGraph::Query do
 
   before :each do
     @repository = RDF::AllegroGraph::Repository.new(REPOSITORY_OPTIONS)
     @new = RDF::AllegroGraph::Query.method(:new)
+    @queryable = @repository
   end
 
   after :each do
     @repository.clear
   end
 
-  it_should_behave_like RDF_Query
+  include RDF_Queryable
 
   describe "#run" do
-    
+
     context "in any case" do
       before do
+        @repository.clear # because of include RDF_Queryable
         @repository.insert(
           [EX.me, RDF.type, FOAF.Person],
           [EX.john, RDF.type, FOAF.Person])
@@ -25,31 +27,31 @@ describe RDF::AllegroGraph::Query do
           q.pattern [:person, RDF.type, FOAF.Person]
         end
       end
-  
+
       it "runs the query against the repository" do
         @query.run.to_a.should include_solution(:person => EX.me)
       end
-  
+
       it "accepts a block argument" do
         solutions = []
         @query.run {|s| solutions << s }
         solutions.should include_solution(:person => EX.me)
       end
-      
+
       it "should not limit the number of results by default" do
-        sln = @query.run.to_a.should have(2).items  
+        sln = @query.run.to_a.should have(2).items
       end
-      
+
       it "should limit the number of results when passed :limit => n" do
         @repository.build_query(:limit => 1) do |q|
           q << [:person, RDF.type, FOAF.Person]
         end.run.to_a.should have(1).items
       end
     end
-    
+
     context "with an RDFS/OWL ontology" do
       Concepts = RDF::Vocabulary.new("http://www.example.com/Concepts#")
-  
+
       before do
         @repository.insert(
           [Concepts.Celine, RDF.type, Concepts.Woman],
@@ -57,7 +59,7 @@ describe RDF::AllegroGraph::Query do
           [Concepts.Person, RDF.type, RDF::OWL.Class],
           [Concepts.Woman, RDF::RDFS.subClassOf, Concepts.Person])
       end
-  
+
       it "does not run inference by default" do
         sln = @repository.build_query do |q|
           q << [Concepts.Celine, RDF.type, :klass]
@@ -65,21 +67,21 @@ describe RDF::AllegroGraph::Query do
         sln.should include_solution(:klass => Concepts.Woman)
         sln.should_not include_solution(:klass => Concepts.Person)
       end
-  
+
       it "does run inference when passed :infer => true" do
         sln = @repository.build_query(:infer => true) do |q|
           q << [Concepts.Celine, RDF.type, :klass]
         end.run.to_a
         sln.should include_solution(:klass => Concepts.Woman)
-        sln.should include_solution(:klass => Concepts.Person)      
+        sln.should include_solution(:klass => Concepts.Person)
       end
-  
+
       it "does run inference when passed :infer => 'rdfs++'" do
         sln = @repository.build_query(:infer => 'rdfs++') do |q|
           q << [Concepts.Celine, RDF.type, :klass]
         end.run.to_a
         sln.should include_solution(:klass => Concepts.Woman)
-        sln.should include_solution(:klass => Concepts.Person)      
+        sln.should include_solution(:klass => Concepts.Person)
       end
     end
   end
