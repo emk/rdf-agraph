@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rdf-agraph (0.3.2)
+    rdf-agraph (0.4)
       agraph (~> 0.2)
       json (~> 1.7)
       rdf (~> 1.0)
