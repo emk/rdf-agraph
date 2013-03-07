@@ -1,6 +1,7 @@
 # Set up bundler and require all our support gems.
 require 'rubygems'
 require 'bundler'
+require 'dotenv'
 Bundler.require(:default, :development)
 
 # Add our library directory to our require path.
@@ -9,12 +10,35 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 # Load the entire gem through our top-level file.
 require 'rdf-agraph'
 
+Dotenv.load
+
 # Options that we use to connect to a repository.
 REPOSITORY_OPTIONS = {
-  :server => RDF::AllegroGraph::Server.new("http://test:test@localhost:10035"),
-  :id => 'rdf_agraph_test'
+  :id => 'rdf_agraph_test',
+  :url => "http://#{ENV['AG_USER']}:#{ENV['AG_PASS']}@localhost:10035"
 }
-REPOSITORY_OPTIONS[:server].repository("rdf_agraph_test", :create => true)
+server = RDF::AllegroGraph::Server.new(REPOSITORY_OPTIONS[:url])
+server.repository(REPOSITORY_OPTIONS[:id], :create => true)
+REPOSITORY_OPTIONS[:server] = server
+
+CATALOG_REPOSITORY_OPTIONS = {
+  :id => 'rdf_agraph_test',
+  :catalog_id => 'catalog_rdf_agraph_test'
+}
+
+begin
+  catalog = server.catalog(CATALOG_REPOSITORY_OPTIONS[:catalog_id], :create => true)
+  catalog.repository(CATALOG_REPOSITORY_OPTIONS[:id], :create => true)
+  CATALOG_REPOSITORY_OPTIONS[:catalog] = catalog
+  CATALOG_REPOSITORY_OPTIONS[:server] = server
+rescue
+  puts "---------------------------"
+  puts "Error : Your AllegroGraph server must be configured with the directive 'DynamicCatalogs'."
+  puts "Without it, dynamic creation of catalogs using HTTP is not possible."
+  puts "See http://www.franz.com/agraph/support/documentation/current/daemon-config.html#DynamicCatalogs"
+  puts "---------------------------"
+  exit
+end
 
 # RDF vocabularies.
 FOAF = RDF::FOAF

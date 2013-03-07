@@ -23,6 +23,8 @@ module RDF::AllegroGraph
     #
     # We actually stack up pretty well against this list.
 
+    attr_reader :resource, :resource_writable
+    attr_reader :global_query_options
 
     #--------------------------------------------------------------------
     # @group RDF::Repository methods
@@ -32,12 +34,14 @@ module RDF::AllegroGraph
     # @param [AllegroGraph::Resource] resource
     #   The underlying 'agraph'-based implementation to wrap.
     # @private
-    def initialize(resource)
-      @repo = resource
+    def initialize(resource, options={})
+      @resource = resource
+      @resource_writable = options[:writable_repository] || resource
       @blank_nodes = []
       @blank_nodes_to_generate = 8
       @blank_nodes_local_to_server = {}
       @blank_nodes_server_to_local = {}
+      self.global_query_options = options[:query]
     end
 
     # Returns true if `feature` is supported.
@@ -50,7 +54,23 @@ module RDF::AllegroGraph
       else super
       end
     end
-    
+
+    # Set the global query options that will be used at each request.
+    # Current supported options are :offset, :limit and :infer.
+    #
+    # @param [Hash] options the options to set
+    #
+    # http://www.franz.com/agraph/support/documentation/current/http-protocol.html#get-post-repo
+    def global_query_options=(options)
+      @global_query_options = filter_query_options(options)
+    end
+
+    # Returns the amount of statements in the repository, as an integer
+    #
+    # @return [Integer] the number of statements
+    def size
+      @resource.size
+    end
 
     #--------------------------------------------------------------------
     # @group RDF::Transaction support
@@ -85,7 +105,7 @@ module RDF::AllegroGraph
     # @param [RDF::Statement] statement
     # @return [Boolean]
     def has_statement?(statement)
-      found = @repo.statements.find(statement_to_dict(statement))
+      found = @resource.statements.find(statement_to_dict(statement))
       !found.empty?
     end
 
@@ -110,7 +130,7 @@ module RDF::AllegroGraph
 
     # How many statements are in this repository?
     #def count
-    #  @repo.request_http(:get, path(:statements),
+    #  @resource.request_http(:get, path(:statements),
     #                     :headers => { 'Accept' => 'text/integer' },
     #                     :expected_status_code => 200).chomp.to_i
     #end
@@ -137,7 +157,7 @@ module RDF::AllegroGraph
         seen = {}
         dict = statement_to_dict(pattern)
         dict.delete(:context) if dict[:context] == 'null'
-        @repo.statements.find(dict).each do |statement|
+        @resource.statements.find(dict).each do |statement|
           unless seen.has_key?(statement)
             seen[statement] = true
             s,p,o,c = statement.map {|v| unserialize(v) }
@@ -167,7 +187,7 @@ module RDF::AllegroGraph
     # @see    RDF::Queryable#query
     # @see    RDF::Query#execute
     def query_execute(query, &block)
-      query_options = 
+      query_options =
         if query.respond_to?(:query_options)
           query.query_options
         else
@@ -207,6 +227,7 @@ module RDF::AllegroGraph
     #
     # @see #build_query
     def sparql_query(query, query_options={}, &block)
+      query_options[:type] = query.split(' ').first.downcase.to_sym unless query.empty?
       raw_query(:sparql, query, query_options, &block)
     end
 
@@ -241,17 +262,23 @@ module RDF::AllegroGraph
       params = {
         :query => query,
         :queryLn => language.to_s
-      }
-      params[:infer] = query_options[:infer].to_s if query_options[:infer]
+      }.merge!(@global_query_options).merge!(filter_query_options(query_options))
 
       # Run the query and process the results.
-      json = @repo.request_json(:get, path, :parameters => params,
+      json = @resource.request_json(:get, path, :parameters => params,
                                 :expected_status_code => 200)
-      results = json_to_query_solutions(json)
+
+      # Parse the result (depends on the type of the query)
+      if language == :sparql and query_options[:type] == :construct
+        results = json_to_graph(json)
+      else
+        results = json_to_query_solutions(json)
+        results = enum_for(:raw_query, language, query) unless block_given?
+      end
       if block_given?
         results.each {|s| yield s }
       else
-        enum_for(:raw_query, language, query)
+        results
       end
     end
     protected :raw_query
@@ -304,7 +331,7 @@ module RDF::AllegroGraph
       # Note that specifying deleteDuplicates on repository creation doesn't
       # seem to affect this.
       json = statements_to_json(statements)
-      @repo.request_json(:post, path(:statements), :body => json,
+      @resource_writable.request_json(:post, path_writable(:statements), :body => json,
                          :expected_status_code => 204)
     end
     protected :insert_statements
@@ -326,7 +353,7 @@ module RDF::AllegroGraph
     # @return [void]
     def delete_statements(statements)
       json = statements_to_json(statements)
-      @repo.request_json(:post, path('statements/delete'),
+      @resource_writable.request_json(:post, path_writable('statements/delete'),
                          :body => json, :expected_status_code => 204)
     end
     protected :delete_statements
@@ -336,9 +363,14 @@ module RDF::AllegroGraph
 
     # Clear all statements from the repository.
     #
+    # @param [Hash] options
+    # @option options [String] :subject Match a specific subject
+    # @option options [String] :predicate Match a specific predicate
+    # @option options [String] :object Match a specific object
+    # @option options [String] :context Match a specific graph name.
     # @return [void]
-    def clear
-      @repo.statements.delete
+    def clear(options = {})
+      @resource_writable.statements.delete(options)
     end
 
 
@@ -356,6 +388,7 @@ module RDF::AllegroGraph
     def serialize(value)
       case value
       when RDF::Query::Variable then value.to_s
+      when false then nil
       else RDF::NTriples::Writer.serialize(map_to_server(value))
       end
     end
@@ -380,9 +413,18 @@ module RDF::AllegroGraph
     # Build a repository-relative path.
     def path(relative_path=nil)
       if relative_path
-        "#{@repo.path}/#{relative_path}"
+        "#{@resource.path}/#{relative_path}"
       else
-        @repo.path
+        @resource.path
+      end
+    end
+
+    # Build a repository-relative path for the writable mirror
+    def path_writable(relative_path=nil)
+      if relative_path
+        "#{@resource_writable.path}/#{relative_path}"
+      else
+        @resource_writable.path
       end
     end
 
@@ -406,7 +448,7 @@ module RDF::AllegroGraph
         tuple = [s.subject, s.predicate, s.object]
         tuple << s.context if s.context
         tuple.map {|v| serialize(v) }
-      end        
+      end
     end
 
     # Translate a RDF::Statement into a dictionary the we can pass
@@ -420,7 +462,7 @@ module RDF::AllegroGraph
         # to operate a single statement.  Otherwise, we will operate
         # on all matching s,p,o triples regardless of context.
         :context => serialize(statement.context) || 'null'
-      }
+      }.merge!(@global_query_options)
     end
 
     # Convert a query to SPARQL.
@@ -428,7 +470,7 @@ module RDF::AllegroGraph
       variables = []
       patterns = []
       query.patterns.each do |p|
-        p.variables.each {|_,v| variables << v unless variables.include?(v) }
+        variables.concat(p.variables.values)
         triple = [p.subject, p.predicate, p.object]
         str = triple.map {|v| serialize(v) }.join(" ")
         # TODO: Wrap in graph block for context!
@@ -437,7 +479,7 @@ module RDF::AllegroGraph
         end
         patterns << "#{str} ."
       end
-      "SELECT #{variables.join(" ")}\nWHERE {\n  #{patterns.join("\n  ")} }"
+      "SELECT #{variables.uniq.join(" ")}\nWHERE {\n  #{patterns.join("\n  ")} }"
     end
 
     # Convert a JSON query solution to a list of RDF::Query::Solution
@@ -453,7 +495,15 @@ module RDF::AllegroGraph
           hash[name] = unserialize(match[i]) unless match[i].nil?
         end
         RDF::Query::Solution.new(hash)
-      end      
+      end
+    end
+
+    # Convert a JSON triples list to a RDF::Graph object.
+    def json_to_graph(json)
+      statements = json.map {|t| RDF::Statement.new(unserialize(t[0]), unserialize(t[1]), unserialize(t[2]))}
+      graph = RDF::Graph.new
+      graph.insert_statements(statements)
+      graph
     end
 
     # Return true if this a blank RDF node.
@@ -463,7 +513,7 @@ module RDF::AllegroGraph
 
     # Ask AllegroGraph to generate a series of blank node IDs.
     def generate_blank_nodes(amount)
-      response = @repo.request_http(:post, path(:blankNodes),
+      response = @resource.request_http(:post, path(:blankNodes),
                                     :parameters => { :amount => amount },
                                     :expected_status_code => 200)
       response.chomp.split("\n").map {|i| i.gsub(/^_:/, '') }
@@ -511,5 +561,21 @@ module RDF::AllegroGraph
         value
       end
     end
+
+    # Set queries/statements options that will be used at each request
+    #
+    # @param [Hash] options options to use. Currently :limit and :infer are supported.
+    # @return [Hash] the options
+
+    # @private
+    def filter_query_options(options)
+      options ||= {}
+      filtered_options = {}
+      [ :limit, :infer, :offset ].each do |key|
+        filtered_options.merge! key => options[key] if options.has_key?(key)
+      end
+      filtered_options
+    end
+    protected :filter_query_options
   end
 end

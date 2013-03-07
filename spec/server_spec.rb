@@ -6,7 +6,7 @@ describe RDF::AllegroGraph::Server do
   # and modified to remove 'url' and 'connection'.
   describe "RDF::Sesame compatibility" do
     before :each do
-      @url    = "http://test:test@localhost:10035"
+      @url    = REPOSITORY_OPTIONS[:url]
       @server = RDF::AllegroGraph::Server.new(@url)
     end
 
@@ -51,6 +51,70 @@ describe RDF::AllegroGraph::Server do
       @server.each_repository do |repository|
         repository.should be_instance_of(RDF::AllegroGraph::Repository)
       end
-    end    
+    end
+
+    it "returns available catalogs" do
+      @server.should respond_to(:catalogs)
+      @server.catalogs.should be_a_kind_of(Enumerable)
+      @server.catalogs.should be_instance_of(Hash)
+      @server.catalogs.each do |identifier, catalog|
+        identifier.should be_instance_of(String)
+        catalog.should be_instance_of(RDF::AllegroGraph::Catalog)
+      end
+    end
+
+    it "indicates whether a catalog exists" do
+      @server.should respond_to(:has_catalog?)
+      @server.has_catalog?(CATALOG_REPOSITORY_OPTIONS[:catalog_id]).should be_true
+      @server.has_catalog?(:foobar).should be_false
+    end
+
+    it "returns existing catalog" do
+      @server.should respond_to(:catalog)
+      catalog = @server.catalog(CATALOG_REPOSITORY_OPTIONS[:catalog_id])
+      catalog.should_not be_nil
+      catalog.should be_instance_of(RDF::AllegroGraph::Catalog)
+    end
+
+    it "does not return nonexistent catalogs" do
+      lambda { @server.catalog(:foobar) }.should_not raise_error
+      catalog = @server.catalog(:foobar)
+      catalog.should be_nil
+    end
+
+    it "supports enumerating catalogs" do
+      @server.should respond_to(:each_catalog, :each)
+      # @server.each_repository.should be_an_enumerator
+      @server.each_catalog do |catalog|
+        catalog.should be_instance_of(RDF::AllegroGraph::Catalog)
+      end
+    end
+
+    it "returns the initfile" do
+      @server.should respond_to(:initfile)
+      content = @server.initfile || ""
+      content.should be_instance_of(String)
+    end
+
+    it "list scripts" do
+      @server.should respond_to(:scripts)
+    end
+
+    it "create scripts" do
+      @server.should respond_to(:save_script)
+      @server.save_script 'subfolder/script', ';; COMMENT'
+      @server.scripts.should include 'subfolder/script'
+    end
+
+    it "get scripts" do
+      @server.should respond_to(:get_script)
+      @server.get_script('subfolder/script').should == ';; COMMENT'
+    end
+
+    it "remove scripts" do
+      @server.should respond_to(:remove_script)
+      @server.remove_script('subfolder/script')
+      @server.scripts.should_not include 'subfolder/script'
+    end
   end
 end

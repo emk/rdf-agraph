@@ -9,7 +9,7 @@ Gem::Specification.new do |gem|
   gem.summary = "AllegroGraph adapter for RDF.rb"
   gem.description = "An AllegroGraph adapter for use with RDF.rb."
   gem.rubyforge_project = 'rdf-agraph'
-  
+
   gem.authors = ['Eric Kidd']
   gem.email = 'rdf-agraph@kiddsoftware.com'
 
@@ -19,18 +19,16 @@ Gem::Specification.new do |gem|
   #gem.executables = %w()
   gem.require_paths = %w(lib)
   gem.has_rdoc = false
-  
+
   gem.required_ruby_version = '>= 1.8.7'
 
-  gem.add_runtime_dependency 'rdf',    '~> 0.3.1'
-  gem.add_runtime_dependency 'agraph', '~> 0.1.4'
-  # This should be pulled in by agraph, but it isn't.
-  gem.add_runtime_dependency 'json',   '>= 0.5.1'
+  gem.add_runtime_dependency 'rdf', '~> 1.0'
+  gem.add_runtime_dependency 'agraph', '~> 0.2'
+  gem.add_runtime_dependency 'json',   '~> 1.7'
 
-  gem.add_development_dependency 'rdf-spec',  '~> 0.3.1'
-  gem.add_development_dependency 'yard',      '>= 0.6.0'
-  gem.add_development_dependency 'BlueCloth', '>= 1.0.1' # For yard.
-  gem.add_development_dependency 'rspec',     '>= 2.5.0'
-  gem.add_development_dependency 'rcov',      '>= 0.9.9'
-  gem.add_development_dependency 'rake',      '>= 0.8.7'
+  gem.add_development_dependency 'rdf-spec',  '~> 1.0'
+  gem.add_development_dependency 'yard',      '~> 0.8'
+  gem.add_development_dependency 'rspec',     '~> 2.12.0'
+  gem.add_development_dependency 'rake',      '~> 10.0.0'
+  gem.add_development_dependency 'dotenv',      '~> 0.5'
 end

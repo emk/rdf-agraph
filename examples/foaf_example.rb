@@ -3,7 +3,7 @@ gem 'rdf-agraph'
 require 'rdf-agraph'
 
 # Connect to our repository.
-url = "http://user:passwd@localhost:10035/repositories/example"
+url = "http://test:xyzzy@192.168.198.150:10035/repositories/wilburwine"
 repo = RDF::AllegroGraph::Repository.new(url, :create => true)
 
 # Define some useful RDF vocabularies.

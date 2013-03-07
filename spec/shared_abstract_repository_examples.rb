@@ -9,7 +9,7 @@ end
 shared_examples_for RDF::AllegroGraph::AbstractRepository do
   # This pulls in a huge number of specifications from rdf-spec, ensuring
   # that we implement the standard API correctly.
-  it_should_behave_like RDF_Repository
+  include RDF_Repository
 
   describe "#supports?" do
     it "returns true if passed :context" do
@@ -25,6 +25,12 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
     before :each do
       path = File.join(File.dirname(__FILE__), '..', 'etc', 'doap.nt')
       @repository.load(path)
+    end
+
+    describe "#size" do
+      it "returns the amount of statements in the repository" do
+        @repository.size.should eql(73)
+      end
     end
 
     describe "#delete_statement (protected)" do
@@ -43,14 +49,23 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
     end
 
     describe "#sparql_query" do
-      it "matches a SPARQL query" do
-        s = @repository.sparql_query(<<EOD)
-SELECT ?name WHERE {
-  <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }
-EOD
-        s.should be_kind_of(enumerator_class)
-        s.should include_solution(:name => "Arto Bendiken")
+
+      context "when SELECT query" do
+        it "matches a SPARQL query" do
+          s = @repository.sparql_query("SELECT ?name WHERE { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }")
+          s.should be_kind_of(enumerator_class)
+          s.should include_solution(:name => "Arto Bendiken")
+        end
       end
+
+      context "when CONSTRUCT query" do
+        it "matches a SPARQL query" do
+          s = @repository.sparql_query("CONSTRUCT { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name } WHERE { <http://ar.to/#self> <http://xmlns.com/foaf/0.1/name> ?name }")
+          s.should be_kind_of(RDF::Graph)
+          s.should have_statement(RDF::Statement.new(RDF::URI('http://ar.to/#self'), RDF::URI('http://xmlns.com/foaf/0.1/name'), RDF::Literal('Arto Bendiken')))
+        end
+      end
+
     end
 
     describe "#prolog_query" do
@@ -61,6 +76,15 @@ EOD
 EOD
         s.should be_kind_of(enumerator_class)
         s.should include_solution(:name => "Arto Bendiken")
+      end
+    end
+
+    describe "#global_query_options" do
+      it "add parameters to each query" do
+        @repository.global_query_options = { :limit => 1, :offset => 1 }
+        s = @repository.sparql_query("SELECT ?person WHERE { ?person a <http://xmlns.com/foaf/0.1/Person> }")
+        s.should_not include_solution(:person => "http://ar.to/#self")
+        s.should include_solution(:person => "http://bhuga.net/#ben")
       end
     end
 
