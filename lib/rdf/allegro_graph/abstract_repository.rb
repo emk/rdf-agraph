@@ -24,7 +24,10 @@ module RDF::AllegroGraph
     # We actually stack up pretty well against this list.
 
     attr_reader :resource, :resource_writable
-    attr_reader :global_query_options
+    attr_reader :query_options, :insert_options
+
+    AUTH_QUERY_OPTIONS = [ :limit, :infer, :offset ]
+    AUTH_INSERT_OPTIONS = [ :context, :continueOnError, :commit ]
 
     #--------------------------------------------------------------------
     # @group RDF::Repository methods
@@ -41,7 +44,8 @@ module RDF::AllegroGraph
       @blank_nodes_to_generate = 8
       @blank_nodes_local_to_server = {}
       @blank_nodes_server_to_local = {}
-      self.global_query_options = options[:query]
+      self.query_options = options[:query]
+      self.insert_options = options[:insert]
     end
 
     # Returns true if `feature` is supported.
@@ -61,8 +65,20 @@ module RDF::AllegroGraph
     # @param [Hash] options the options to set
     #
     # http://www.franz.com/agraph/support/documentation/current/http-protocol.html#get-post-repo
-    def global_query_options=(options)
-      @global_query_options = filter_query_options(options)
+    def query_options=(options)
+      @query_options = filter_query_options(options)
+    end
+
+    # Set the global insert options that will be used at each POST request.
+    # Current supported options are :context, :continueOnError, :commit.
+    #
+    # @param [Hash] options the options to set
+    #
+    # http://www.franz.com/agraph/support/documentation/current/http-protocol.html#put-post-statements
+    def insert_options=(options)
+      options||={}
+      @format = options.delete(:format) || :json
+      @insert_options = filter_insert_options(options)
     end
 
     # Returns the amount of statements in the repository, as an integer
@@ -262,7 +278,7 @@ module RDF::AllegroGraph
       params = {
         :query => query,
         :queryLn => language.to_s
-      }.merge!(@global_query_options).merge!(filter_query_options(query_options))
+      }.merge!(@query_options).merge!(filter_query_options(query_options))
 
       # Run the query and process the results.
       json = @resource.request_json(:get, path, :parameters => params,
@@ -330,9 +346,23 @@ module RDF::AllegroGraph
       #
       # Note that specifying deleteDuplicates on repository creation doesn't
       # seem to affect this.
-      json = statements_to_json(statements)
-      @resource_writable.request_json(:post, path_writable(:statements), :body => json,
-                         :expected_status_code => 204)
+      case @format
+      when :json
+        json = statements_to_json(statements)
+        @resource_writable.request_json(:post, path_writable(:statements),
+          :parameters => prepare_filter_insert_options(@insert_options),
+          :body => json,
+          :expected_status_code => 204)
+      when :ntriples
+        text = statements_to_text_plain(statements)
+        @resource_writable.request_http(:post, path_writable(:statements),
+          :parameters => prepare_filter_insert_options(@insert_options),
+          :body => text,
+          :expected_status_code => 200,
+          :headers => { "Content-Type" => "text/plain" })
+      else
+        raise "Format #{@format} not supported"
+      end
     end
     protected :insert_statements
 
@@ -370,7 +400,7 @@ module RDF::AllegroGraph
     # @option options [String] :context Match a specific graph name.
     # @return [void]
     def clear(options = {})
-      @resource_writable.statements.delete(options)
+      @resource_writable.statements.delete(prepare_filter_insert_options(options))
     end
 
 
@@ -462,7 +492,16 @@ module RDF::AllegroGraph
         # to operate a single statement.  Otherwise, we will operate
         # on all matching s,p,o triples regardless of context.
         :context => serialize(statement.context) || 'null'
-      }.merge!(@global_query_options)
+      }.merge!(@query_options)
+    end
+
+    # Convert a list of statements to a text-plain-compatible text.
+    def statements_to_text_plain(statements)
+      graph = RDF::Repository.new
+      statements.each do |s|
+        graph << s
+      end
+      RDF::NTriples::Writer.dump(graph, nil, :encoding => Encoding::ASCII)
     end
 
     # Convert a query to SPARQL.
@@ -562,20 +601,34 @@ module RDF::AllegroGraph
       end
     end
 
-    # Set queries/statements options that will be used at each request
-    #
-    # @param [Hash] options options to use. Currently :limit and :infer are supported.
-    # @return [Hash] the options
-
     # @private
     def filter_query_options(options)
-      options ||= {}
-      filtered_options = {}
-      [ :limit, :infer, :offset ].each do |key|
-        filtered_options.merge! key => options[key] if options.has_key?(key)
-      end
-      filtered_options
+      options||={}
+      options.select { |k,v| AUTH_QUERY_OPTIONS.include?(k) }
     end
     protected :filter_query_options
+
+    # @private
+    def filter_insert_options(options)
+      options||={}
+      options.select { |k,v| AUTH_INSERT_OPTIONS.include?(k) && v }
+    end
+    protected :filter_insert_options
+
+    private
+
+    def prepare_context(context)
+      if context.to_s != 'null'
+        "\"#{context}\""
+      else
+        context
+      end
+    end
+
+    def prepare_filter_insert_options(options)
+      options = options.dup
+      options[:context] = prepare_context(options[:context]) if options[:context]
+      options
+    end
   end
 end

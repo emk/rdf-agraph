@@ -15,7 +15,7 @@ Dotenv.load
 # Options that we use to connect to a repository.
 REPOSITORY_OPTIONS = {
   :id => 'rdf_agraph_test',
-  :url => "http://#{ENV['AG_USER']}:#{ENV['AG_PASS']}@localhost:10035"
+  :url => ENV['AG_URL']
 }
 server = RDF::AllegroGraph::Server.new(REPOSITORY_OPTIONS[:url])
 server.repository(REPOSITORY_OPTIONS[:id], :create => true)
