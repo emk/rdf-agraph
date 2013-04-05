@@ -33,6 +33,26 @@ shared_examples_for RDF::AllegroGraph::AbstractRepository do
       end
     end
 
+    describe "#insert_statements (protected)" do
+      let(:statement) { [RDF::Statement.new(RDF::URI("http://ar.to/#someone"), FOAF.mbox, RDF::URI("mailto:someone@gmail.com"))] }
+
+      context "with :json format" do
+        before { @repository.insert_options = { :format => :json } }
+        it "should use a JSON request to send the statements" do
+          @repository.resource_writable.should_receive(:request_json).at_least(:once).and_call_original
+          @repository.send(:insert_statements, statement)
+        end
+      end
+
+      context "with :ntriples format" do
+        before { @repository.insert_options = { :format => :ntriples } }
+        it "should use a HTTP request to send the statements" do
+          @repository.resource_writable.should_receive(:request_http).at_least(:once).and_call_original
+          @repository.send(:insert_statements, statement)
+        end
+      end
+    end
+
     describe "#delete_statement (protected)" do
       it "deletes a single, valid statement" do
         stmt = RDF::Statement.new(RDF::URI("http://ar.to/#self"),
@@ -79,9 +99,9 @@ EOD
       end
     end
 
-    describe "#global_query_options" do
+    describe "#query_options" do
       it "add parameters to each query" do
-        @repository.global_query_options = { :limit => 1, :offset => 1 }
+        @repository.query_options = { :limit => 1, :offset => 1 }
         s = @repository.sparql_query("SELECT ?person WHERE { ?person a <http://xmlns.com/foaf/0.1/Person> }")
         s.should_not include_solution(:person => "http://ar.to/#self")
         s.should include_solution(:person => "http://bhuga.net/#ben")
